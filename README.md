@@ -4,18 +4,32 @@ A single-page marketing site for **NutriHealth USA · PhosphoPower® Micronized*
 
 ### Where the panel numbers come from
 
-The Supplement Facts panel mirrors the **printed label artwork**, not an assumption: `facts.rows[].dvPrinted` is
-the %DV exactly as it appears on the package (calcium 70 mg → 5%, zinc 40 mg as zinc gluconate → 364%), so the
-page can never disagree with the bottle. Where a row has no printed percentage, it is computed from the
-reference daily values in `src/lib/ld.js` (calcium 1,300 mg, magnesium 420 mg, zinc 11 mg; <50% in 2% steps,
-≥50% in 5%). Two traps that file already handles, because both bit once:
+The Supplement Facts panel mirrors the **printed label artwork, read at 9× zoom**, not an assumption:
+`facts.rows[].dvPrinted` is the %DV exactly as it appears on the package — calcium 70 mg → 5%, zinc
+40 mg → 364% — so the page can never disagree with the bottle. The panel prints **two** rows and
+nothing else is declared. Where a row has no printed percentage it is computed from the reference
+daily values in `src/lib/ld.js` (calcium 1,300 mg, magnesium 420 mg, zinc 11 mg; <50% in 2% steps,
+≥50% in 5%) — that map keeps magnesium for completeness even though the panel does not carry a
+magnesium line.
 
-- **Units.** Magnesium is declared in micrograms (950 mcg) while the DV ratio needs milligrams, so the row
-  carries `amount: 950, unit: 'mcg'` for display and `dvAmount: 0.95` for the math. Never feed a mcg number
-  straight into `percentDailyValue`.
-- **Zero is a value.** `pct === null` means “no established DV” (dagger + dashed track). `pct === 0` means a
-  real 0% and must render `0%` on an empty real track — a truthy check (`pct ? …`) silently turns 0% into a
-  dagger, which is how the magnesium row nearly shipped wrong.
+Two traps the rendering code still handles, because both bit while the panel wrongly had a third row:
+
+- **Units.** A row declared in micrograms needs `amount`/`unit` for display and `dvAmount` in
+  milligrams for the DV ratio. Never feed a mcg number straight into `percentDailyValue`.
+- **Zero is a value.** `pct === null` means "no established DV" (dagger + dashed track); `pct === 0`
+  is a real 0% and renders `0%` on an empty real track — a truthy check (`pct ? …`) silently turns a
+  real zero into a dagger.
+
+**Correction, 2026-10-11.** An earlier transcription of this same artwork invented a third row —
+"Magnesium 950 mcg, 0%" — called zinc "zinc gluconate" and spelled the brand "NutriGPA™". Zoomed, the
+print says **zinc as zinc glycinate**, **NutriGP®**, and there is **no magnesium row**: that mineral is
+only in Other Ingredients, as magnesium stearate and magnesium carbonate in the shell blend. The 950 mcg
+was ours, not the label's, and it had already spread to the hero line, both marquees, the formula cards,
+the athlete card, the drug-interaction caution, the `index.html` title/description/og/noscript block and
+the JSON-LD description. When a label fact changes, grep `src/` *and* `index.html` for the number — a
+label fact is never in exactly one place. And crop-plus-upscale before transcribing: at 100% zoom this
+artwork is legible enough to be confidently wrong.
+
 English-only, US market, React 19 + Vite 8, no CSS framework, no CDN, no webfonts.
 
 ## Run it

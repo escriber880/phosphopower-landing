@@ -22,7 +22,7 @@ export const brand = {
   company: 'NutriHealth USA',
   product: 'PhosphoPower® Micronized',
   shortName: 'PhosphoPower',
-  line: 'Calcium · Magnesium · Zinc',
+  line: 'Calcium · Zinc · Calcium AEP',
   site: 'https://www.phosphopower.com',
   email: 'nthsupplements@gmail.com',
   address: 'Orlando, FL — USA',
@@ -68,7 +68,7 @@ export const hero = {
   titleA: 'Minerals that show up.',
   titleB: 'A story we can document.',
   sub:
-    'PhosphoPower® Micronized delivers calcium from three salts — one of them calcium 2-aminoethylphosphate, the calcium AEP on our label — with zinc as zinc gluconate and a declared magnesium trace. Three nutrients with well-characterized jobs in muscle contraction, energy metabolism and normal immune function, printed milligram for milligram.',
+    'PhosphoPower® Micronized delivers calcium from three salts — one of them calcium 2-aminoethylphosphate, the calcium AEP on our label — with zinc as zinc glycinate. Two declared nutrients, two well-characterized jobs, muscle contraction and normal immune function, printed milligram for milligram.',
   primary: { label: 'Read the formula', href: '#formula' },
   secondary: { label: 'Compare the panel', href: '#facts' },
   badges: [
@@ -93,8 +93,8 @@ export const ticker = [
 /* Two kinetic bands under the hero. Everything here is a label fact: form,
    count, assay practice, identity. No outcomes, no superlatives. */
 export const marquee = {
-  a: ['Micronized powder', 'Three declared minerals', '60 vegan capsules', 'One morning, one night', 'COA with every batch', 'Third-party assayed'],
-  b: ['Calcium 70 mg', 'Zinc 40 mg', 'Magnesium 950 mcg', 'Zinc as zinc gluconate', 'CAS 10389-08-9', 'No titanium dioxide'],
+  a: ['Micronized powder', 'Two declared nutrients', '60 vegan capsules', 'One morning, one night', 'COA with every batch', 'Third-party assayed'],
+  b: ['Calcium 70 mg', 'Zinc 40 mg', 'Zinc as zinc glycinate', 'NutriGP® calcium glycerophosphate', 'CAS 10389-08-9', 'No titanium dioxide'],
 }
 
 export const positioning = {
@@ -131,7 +131,7 @@ export const positioning = {
 
 export const formula = {
   kicker: '02 — The formula',
-  title: 'Three nutrients, and what each one is documented to contribute to.',
+  title: 'Two nutrients, and what each one is documented to contribute to.',
   /* The old second sentence pointed at the asterisk that used to sit on every claim and
      at the statement in the footer. Both are gone, so this had to go with them: a line
      telling the reader where to look for a note that does not exist is worse than
@@ -153,21 +153,8 @@ export const formula = {
       claimSource: 'Calcium — a well-characterized essential mineral.',
     },
     {
-      name: 'Magnesium',
-      latin: 'declared in micrograms, not milligrams',
-      perServing: '950 mcg per 2 capsules',
-      elemental: '0% DV — a trace amount, not a functional dose',
-      accent: 'blue',
-      claims: [
-        'Magnesium contributes to normal muscle function.',
-        'Magnesium supports energy metabolism and electrolyte balance.',
-        'Magnesium is involved in normal nervous system function.',
-      ],
-      claimSource: 'Magnesium — a well-characterized essential mineral.',
-    },
-    {
       name: 'Zinc',
-      latin: 'as zinc gluconate',
+      latin: 'as zinc glycinate',
       perServing: '40 mg per 2 capsules',
       elemental: '364% DV as printed on the label',
       accent: 'blue',
@@ -240,7 +227,7 @@ export const facts = {
   rows: [
     {
       nutrient: 'Calcium',
-      detail: 'as Calcium Carbonate, NutriGPA™ Calcium Glycerophosphate and Calcium 2-Aminoethyl Phosphate',
+      detail: 'as Calcium Carbonate, NutriGP® Calcium Glycerophosphate and Calcium 2-Aminoethyl Phosphate',
       amount: 70,
       unit: 'mg',
       dvKey: 'calcium',
@@ -248,25 +235,15 @@ export const facts = {
     },
     {
       nutrient: 'Zinc',
-      detail: 'as Zinc Gluconate',
+      detail: 'as Zinc Glycinate',
       amount: 40,
       unit: 'mg',
       dvKey: 'zinc',
       dvPrinted: 364,
     },
-    {
-      nutrient: 'Magnesium',
-      detail: 'from magnesium stearate and magnesium carbonate, listed under Other Ingredients',
-      amount: 950,
-      unit: 'mcg',
-      // %DV math runs in mg, so the printed amount and the amount fed into the
-      // DV ratio are deliberately separate fields.
-      dvAmount: 0.95,
-      dvKey: 'magnesium',
-    },
   ],
   footnote:
-    'Percent Daily Values are calculated against the reference values used for nutrient labeling — calcium 1,300 mg, magnesium 420 mg, zinc 11 mg. Amounts and percentages follow the current printed label artwork, and the bottle governs if yours differs: send a photo of your panel and we will reconcile it against the lot. Magnesium is declared in micrograms, which is why its line reads 0% — a trace, stated plainly rather than rounded up.',
+    'Percent Daily Values are calculated against the reference values used for nutrient labeling — calcium 1,300 mg, zinc 11 mg. Amounts and percentages follow the current printed label artwork, and the bottle governs if yours differs: send a photo of your panel and we will reconcile it. Magnesium is not a declared nutrient on this panel — it is present only as magnesium stearate and magnesium carbonate in the capsule shell blend, so it gets no line and no microgram figure.',
   other: 'Hypromellose (Capsule), Magnesium Stearate, Silicon Dioxide, Microcrystalline Cellulose, Stearic Acid, Magnesium Carbonate.',
   use: {
     title: 'Suggested use',
@@ -282,7 +259,7 @@ export const facts = {
   },
   missing: {
     title: 'Deliberately absent',
-    items: ['Vitamin D3 — add it separately if your 25-OH-D is low', 'Proprietary blends', 'Stimulants', 'Filler milligrams', 'Added sugar, sodium, gluten'],
+    items: ['Vitamin D3 — add it separately if your 25-OH-D is low', 'Proprietary blends', 'Stimulants', 'Filler milligrams', 'A magnesium line — the panel prints none', 'Added sugar, sodium, gluten'],
   },
 }
 
@@ -301,7 +278,7 @@ export const audience = {
       icon: 'bolt',
       title: 'Training load and mineral turnover',
       body:
-        'Magnesium and zinc are involved in muscle function, energy metabolism and protein synthesis, and both leave with sweat. Athletes using this as an inexpensive adequacy tool is the honest framing — the sort of thing you do because your diet is inconsistent, not because of a window.',
+        'Zinc is involved in muscle function, energy metabolism and protein synthesis, and it leaves with sweat. Athletes using this as an inexpensive adequacy tool is the honest framing — the sort of thing you do because your diet is inconsistent, not because of a window.',
       tag: 'Training days',
     },
     {
@@ -315,7 +292,7 @@ export const audience = {
   caution: {
     title: 'If a doctor is already managing your minerals, loop them in',
     body:
-      'Calcium, magnesium and zinc all bind tetracyclines, fluoroquinolones and levothyroxine in the gut, so doses usually want separating by about four hours. Magnesium behaves the same way with some bisphosphonates.',
+      'Calcium and zinc both bind tetracyclines, fluoroquinolones and levothyroxine in the gut, so doses usually want separating by about four hours.',
     cta: 'Ask a question first',
   },
 }
@@ -384,7 +361,7 @@ export const quality = {
     },
     {
       title: 'Traceable to the capsule',
-      body: 'Lot and expiry on the base of the bottle. Quote the lot number and we can tell you what went into it and who tested it.',
+      body: 'The expiration date is printed on the bottom of the bottle, exactly as the label says. Everything else about a batch — who tested it, against what specification — is by email: tell us what is printed on your unit.',
     },
   ],
 }

@@ -218,7 +218,7 @@ for (const r of rows) {
   line('kinetic reveals on mount', r.kineticOn >= 1, `${r.kineticOn} of ${r.kineticCount} blocks is-on`)
   line('word masks open', r.wordMasked && r.wordWide, `masked=${r.wordMasked}`)
   line('marquee runs + fades', r.marqueeName === 'marquee' && r.marqueeMovePx > 2 && r.marqueeMasked, `${r.marqueeMovePx}px moved`)
-  line('sticky stack rises', r.stackCount === 4 && r.stackSticky && r.stackRising, `sticky=${r.stackSticky}`)
+  line('sticky stack rises', r.stackCount === 3 && r.stackSticky && r.stackRising, `${r.stackCount} cards · sticky=${r.stackSticky} · rising=${r.stackRising}`)
   if (r.rafTicks > 2) line('schematic inks', r.draw.inked, `dashoffset ${r.draw.before} → ${r.draw.after} · ${r.rafTicks} frames`)
   else note('schematic inks', `unmeasurable — page received ${r.rafTicks} animation frames`)
   line('svg labels centred', r.labelDrift <= 3, `drift ${r.labelDrift}px`)

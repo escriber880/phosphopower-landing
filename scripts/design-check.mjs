@@ -60,7 +60,7 @@ const structure = await page.evaluate(() => {
     // sticky ingredient stack
     stackCards: stacks.length,
     stackSticky: stacks.every((s) => s.position === 'sticky'),
-    stackOffsetsRise: stacks.length === 4 && stacks.every((s, i) => i === 0 || num(s.top) > num(stacks[i - 1].top)),
+    stackOffsetsRise: stacks.length === 3 && stacks.every((s, i) => i === 0 || num(s.top) > num(stacks[i - 1].top)),
     stackOpaque: getComputedStyle(document.querySelector('.stack-card')).backdropFilter,
 
     // pinned schematic + steps
@@ -286,7 +286,7 @@ const checks = [
   pass('outline word uses a text stroke', parseFloat(structure.kineticOutline) > 0.5),
   pass('two marquees, each with a duplicated row + mask edge', structure.marquees === 2 && structure.marqueeDupes === 4 && structure.marqueeMasked),
   pass('marquee actually moves (motion allowed)', marquee.name === 'marquee' && marquee.moved),
-  pass('formula = 4 sticky stack cards on rising offsets', structure.stackCards === 4 && structure.stackSticky && structure.stackOffsetsRise),
+  pass('formula = 3 sticky stack cards on rising offsets', structure.stackCards === 3 && structure.stackSticky && structure.stackOffsetsRise),
   pass('stack cards are opaque, not frosted (no bleed-through)', structure.stackOpaque === 'none'),
   pass('naming scrolly: 4 steps, one active, regions dim', structure.steps === 4 && structure.activeSteps === 1 && structure.dimmedGroups > 0 && structure.molParts >= 12),
   pass(`active step follows the reading line (${stepTop.active}→${stepDown.active}, tag ${stepTop.litTag}→${stepDown.litTag})`, stepTop.active === 0 && stepDown.active >= stepTop.active + 1 && stepTop.litTag !== stepDown.litTag),
@@ -298,7 +298,7 @@ const checks = [
   pass('hero: 4 floating label facts + side rail + Ken Burns', structure.heroPills === 4 && structure.heroSide && structure.kenBurns === 'breathe'),
   pass('conic edge on stat cards', structure.edgeConic),
   pass('footer wordmark, outlined', structure.footerWord && parseFloat(structure.footerStroke) > 0),
-  pass('3 panel rows, every one with a real %DV (no phantom dagger)', structure.dvBars.length === 3 && structure.dvBars.every((w) => /%$/.test(w)) && !structure.dvBars.includes('none') && structure.pcts.join(',') === '5%,364%,0%'),
+  pass('2 panel rows, every one with a real %DV (no phantom dagger)', structure.dvBars.length === 2 && structure.dvBars.every((w) => /%$/.test(w)) && !structure.dvBars.includes('none') && structure.pcts.join(',') === '5%,364%'),
   pass('FAQ / Evidence / commentary sections stay gone', structure.hasFaq === false && structure.hasLedger === false && structure.deadRules === 0 && structure.sections === 10),
   pass('counters resolve to real values (calm + live)', counted.replace(/\s/g, '') === '30130' && structure.counters.replace(/\s/g, '').length > 0),
   pass(`spotlight + conic edge + tilt + magnetic all respond`, pointer.spotlight !== 'unset' && pointer.edgeOpacity > 0.9 && tilt !== 'unset' && mag.x !== 'unset' && mag.transform.startsWith('matrix')),

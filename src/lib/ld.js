@@ -26,7 +26,7 @@ export function buildProductSchema() {
     name: brand.product,
     brand: { '@type': 'Brand', name: brand.company },
     description:
-      'Calcium (as calcium carbonate, calcium glycerophosphate and calcium 2-aminoethylphosphate), with zinc as zinc gluconate and a magnesium trace, in vegan capsules. 60 capsules, 30 servings.',
+      'Calcium (as calcium carbonate, NutriGP® calcium glycerophosphate and calcium 2-aminoethylphosphate) with zinc as zinc glycinate, in vegan capsules. 60 capsules, 30 servings.',
     image: '/product.png',
     category: 'Dietary Supplement',
     audience: { '@type': 'PeopleAudience', suggestedAge: 'Adult 18+' },

@@ -15,7 +15,7 @@ export default function Facts() {
             <h2 className="h2">{facts.title}</h2>
 
             <ul className="facts-meta" data-edit={import.meta.env.DEV ? 'Fill from the carton of the batch you are shipping' : undefined}>
-              <li>Lot — printed on base</li>
+              <li>Expiry — printed on base</li>
               <li>60 capsules</li>
               <li>30 servings</li>
               <li>COA per batch</li>
