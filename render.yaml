@@ -9,8 +9,18 @@ services:
     branch: main
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
-    pullRequestPreviewsEnabled: true
+    # Deprecated name for the same behavior was `pullRequestPreviewsEnabled: true`; Render's
+    # blueprint spec now wants previews.generation. Omitting it disables PR previews.
+    previews:
+      generation: automatic
+    autoDeployTrigger: commit   # explicit: every push to main deploys, no dashboard toggle needed
     envVars:
+      # Render auto-detects and installs dependencies for static sites *in addition to* the
+      # build command (render.com/docs/static-sites). This repo's devDependencies include
+      # playwright, whose postinstall downloads ~400 MB of browsers — so Render's own install
+      # would double the work and can stall the build. Our buildCommand already runs `npm ci`.
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
       # Vite 8 needs Node ^20.19 || >=22.12. Render's default image can lag, so pin it
       # here as well as in .nvmrc (the two must agree).
       - key: NODE_VERSION
@@ -29,12 +39,11 @@ services:
       - path: /index.html
         name: Cache-Control
         value: public, max-age=0, must-revalidate
-    routes:
-      # This is a single page with in-page anchors, so no SPA fallback is needed
-      # today; it is here so a future /route does not 404 before anyone remembers why.
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    # No catch-all rewrite — deliberately. Render skips rewrite rules for paths that exist
+    # (documented), so /* → /index.html would NOT break /assets/*. It would do something worse
+    # here: the footer links /privacy, /terms and /accessibility, none of which are built yet,
+    # and a catch-all would answer each of them with the landing page at status 200. A 404 is
+    # the honest answer until those pages exist. Add the rewrite the day a router needs one.
 
   # ── B) publish the prebuilt single file (no Node, no npm, seconds to deploy) ───
   # Run `npm run deploy:sync` and commit deploy/index.html, then swap the block above
@@ -45,6 +54,9 @@ services:
   #   branch: main
   #   buildCommand: ""
   #   staticPublishPath: ./deploy
+  #   envVars:
+  #     - key: SKIP_INSTALL_DEPS   # even with an empty build command Render would npm install
+  #       value: "true"           # and fetch playwright's browsers for a build that needs none
   #   headers:
   #     - path: /*
   #       name: Cache-Control
