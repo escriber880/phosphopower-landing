@@ -49,10 +49,15 @@ npm run verify   # loads the built single file over file:// — no server — an
                  # any drift between the shipped head, the JSON-LD and the panel
 ```
 
-`npm run shots` drives the dev server with Playwright: it fails on any console error, page error or failed request, asserts the structural counts
-(10 `<section>` elements of which 9 are numbered 01→09, 4 ingredient cards, 4 quote cards, 4 social cards), checks that the computed
-%DV values reach the DOM, measures horizontal overflow at 1440px and 390px, clicks the placeholder-audit toggle, and writes PNGs to `shots/` (numbered `00–07` for the flow, `09–13` for mobile, the contact section and the standalone file, `r1–r14` for the design layer). It renders with
-`reducedMotion: 'reduce'` so scroll-reveal elements are visible in a full-page capture instead of sitting at `opacity: 0`.
+`npm run shots` drives the dev server with Playwright. Its hard gate is the error channel: it exits 1 on any console error,
+page error or failed request. Everything else it does is *measured and printed* as one JSON audit — section and card counts
+(10 `<section>` elements of which 9 are numbered 01→09; `.ing-card`/`.stack-card` = 3, `.quote-card` = 4, `.social-card` = 4),
+computed %DV reaching the DOM, horizontal overflow at 1440px and 390px, the placeholder-audit toggle, parallax drift — and it
+writes PNGs to `shots/` (numbered `00–07` for the flow, `09–13` for mobile, the contact section and the standalone file, `r1–r14`
+for the design layer). It renders with `reducedMotion: 'reduce'` so scroll-reveal elements are visible in a full-page capture
+instead of sitting at `opacity: 0`. The counts it prints are *asserted* elsewhere: `design-check` (3 stack cards, 9 contiguous
+numerals, chips clear at 4 widths), `cross-check` (sections/numerals on three engines) and `contact` (which nodes must be absent).
+Read the shots output, do not only check its exit code — a count can drift there without failing anything.
 
 ```bash
 npm run dev &     # the shot scripts expect the dev server on :5173
@@ -69,15 +74,16 @@ carries its own picture and asks the network for nothing.
 A turntable was built here and then removed on 2026-10-11: the label artwork was wrapped as a
 cylinder projection in a 2D canvas, then re-made as a three.js mesh over the same texture, with
 the package's proportions measured out of the photograph rather than eyeballed
-(`H/D 1.1944 · label 0.5482 · cap 0.4225 · base 0.2237`, from `scripts/measure-bottle.py`). It
+(`H/D 1.1944 · label 0.5482 · cap 0.4225 · base 0.2237`, measured by a helper (measure-bottle.py) that no longer exists in
+this tree — recover it with `git show 37666dd`). It
 worked on every engine, with a 2D painter for browsers that refuse WebGL. It was taken out
 because the render is a *model* — a white cylinder wearing the print — and the real unit is a
 blue translucent bottle: a hero that reads as an invented object costs more trust than a
 turntable buys. The flat label artwork is therefore not printed on the page at all.
 
-If the mesh is wanted again, the work is in `git log` (commits `fff379d` and `37666dd`, including
-`scripts/spin.mjs`: 38 frame-hash checks that asserted both render layers and re-measured the
-bottle against the photo), and the trade-offs recorded there still apply: +~530 KB in the
+If the mesh is wanted again, the work is in `git log` (commits `fff379d` and `37666dd` — restore
+spin.mjs from there, not from this tree: its 38 frame-hash checks asserted both render layers
+and re-measured the bottle against the photo), and the trade-offs recorded there still apply: +~530 KB in the
 single-file artifact, `preserveDrawingBuffer` so the gates could read frames, and a driver-level
 `texImage3D` rejection from three's PMREM on WebKit.
 
@@ -124,7 +130,7 @@ Section 04 is deliberately **not** on the dark ground: `.section--paper` warms i
 two-column `.facts-grid` with the notes beside it. Those rules live at the end of `src/index.css` and
 were briefly lost when the disclaimer text was deleted (they sat in the same run of CSS), so the panel
 came back as bare text on the dark ground. No gate checks whether a panel is white — check
-`screenshots/04-facts.png` (`npm run shots`) after any CSS deletion near there. The disclaimer copy
+`shots/04-facts.png` (`npm run shots` writes it) after any CSS deletion near there. The disclaimer copy
 stays out; only the styling came back.
 
 ## Structure
