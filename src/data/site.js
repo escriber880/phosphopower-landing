@@ -78,20 +78,6 @@ export const hero = {
     'Lab tested · COA with every batch',
   ],
   photoCaption: 'Current retail unit: 60 vegan capsules, 30 servings. Label panels as printed.',
-  /* The 3D stage is a render of the printed wrap, not a scan of a filled bottle, so the
-     disclosure travels with the component instead of living in a footnote nobody opens.
-     `panels` is read from the live angle, which is what makes the caption honest at
-     40° and at 160° rather than only in the hero shot. */
-  spin: {
-    modes: [
-      { id: 'spin', label: '3D' },
-      { id: 'photo', label: 'Photo' },
-    ],
-    hint: 'Drag to turn',
-    flag: 'Label wrap: printed artwork · Form: modelled, not a scan',
-    aria: 'Turntable view of the printed label artwork. Drag, or press the left and right arrow keys, to rotate the bottle; Home returns to the front panel.',
-    panels: ['front panel', 'directions and contact panel', 'Supplement Facts panel', 'bare bottle behind the label seam'],
-  },
   /* small mono labels that float around the bottle, each on its own parallax plane */
   pills: ['CAS 10389-08-9', '2 capsules daily', '60 veg capsules', 'Micronized'],
 }

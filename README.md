@@ -26,7 +26,6 @@ npm run dev      # http://localhost:5173  (host: true, so it also works behind a
 npm run build    # static output in dist/
 npm run lint     # oxlint
 npm run shots    # headless-Chromium visual + runtime audit (see below)
-npm run spin     # the hero turntable: frames compared by hash, texture pinned by sha256
 npm run design   # design-layer checks + r*.png captures (see below)
 npm run parallax # measures the scroll-parallax rates in a real browser
 npm run voice    # scans the rendered copy for regulatory/agency language
@@ -47,61 +46,26 @@ npm run shots && npm run design && npm run parallax && npm run cross
 npm run deploy:sync && npm run verify   # rebuild the single file, then gate the artifact
 ```
 
-## The 3D bottle
+## The product image
 
-The hero's product card is a turntable with **two render layers over one texture**. Where a
-real WebGL2 context answers, `src/lib/bottleMesh.js` builds the package as geometry — a lathe
-body, a ribbed screw cap, and the label as a cylinder cut to the share of a turn the artwork
-actually covers — lit by a warm key at the painter's azimuth, a cool rim and a hemisphere fill.
-Where it does not (headless Firefox has no WebGL at all, and so will any visitor whose driver
-says no), `src/components/Bottle3D.jsx` paints the same wrap column by column in a 2D canvas:
-one source column per screen column through `θ = asin(dx/R) + φ`, which derives the crowding of
-the print near the silhouette instead of painting a gradient over it. The layer is chosen before
-a context is requested, a throw inside `createBottle` steps down to the painter, and
-`npm run spin` asserts both paths: the layer that matches the engine, the front panel centred at
-rest, bare plastic past the seam, the same panel names, byte-identical frames on `Home`.
+The hero shows the **studio photograph of the retail unit** (`public/product.png`, 1600×1600,
+the image supplied with the project). It is inlined into the single-file build, so the artifact
+carries its own picture and asks the network for nothing.
 
-Nothing is loaded to build it — no CDN, no font, no image request — and the geometry is not
-eyeballed: `python3 scripts/measure-bottle.py` reads the bottle's proportions out of
-`public/product.png` and `src/lib/bottleMeasure.js` is the only place those numbers live, so the
-mesh and the painter cannot drift into two different bottles, and the gate re-runs the measurement
-and fails if the constants no longer match the photograph.
+A turntable was built here and then removed on 2026-10-11: the label artwork was wrapped as a
+cylinder projection in a 2D canvas, then re-made as a three.js mesh over the same texture, with
+the package's proportions measured out of the photograph rather than eyeballed
+(`H/D 1.1944 · label 0.5482 · cap 0.4225 · base 0.2237`, from `scripts/measure-bottle.py`). It
+worked on every engine, with a 2D painter for browsers that refuse WebGL. It was taken out
+because the render is a *model* — a white cylinder wearing the print — and the real unit is a
+blue translucent bottle: a hero that reads as an invented object costs more trust than a
+turntable buys. The flat label artwork is therefore not printed on the page at all.
 
-Two consequences are worth knowing before you "fix" them. The single-file artifact carries
-three.js inline, so it is ~1.28 MB instead of ~723 KB (`externalRequests` stays 0); dropping
-`three` from the standalone build is a one-line change in `scripts/inline.mjs` if the size
-matters more to you than the mesh in the downloaded file. And `shots` reports two warnings —
-`GPU stall due to ReadPixels`, because the *gate* reads the canvas with `toDataURL` under
-`preserveDrawingBuffer: true`, and `CONTEXT_LOST_WEBGL` when the `3D / Photo` switch disposes the
-renderer. Both are the harness and the toggle doing their job; no visitor's page emits them.
-
-
-The texture is a **derived file**: `python3 scripts/prepare-wrap.py` reads the supplied artwork
-and writes `src/assets/label-wrap.jpg`, cutting the fine-print block out of the left panel,
-reflowing that panel, and removing the two claim asterisks the block used to explain (see
-`docs/COMPLIANCE.md` §9). `npm run spin` then pins the result by sha256, so a swapped artwork
-cannot ship a render nobody re-reviewed. Re-run the script after replacing the artwork, then
-update the recorded hash deliberately.
-
-Geometry is derived from the artwork's own aspect (circumference / label height = 2.19), which
-puts the printed wrap at ~88% of the turn: the bare slice behind the seam is drawn as plastic,
-because that is what a glued wrap looks like. The cap, shoulder and base are modelled proportions,
-which is why the card says so.
-
-`npm run design` covers the design layer (**30 checks**): aurora mesh + inert grain, exactly 9 drifting
-numerals numbered 01→09 with no gaps, the word masks actually opening and carrying a text stroke, two
-marquees with duplicated rows that are *measured moving*, four sticky stack cards on strictly rising
-offsets and opaque backgrounds, the scrolly (one active step, the active tag changing, the bonds
-visibly drawing, pinned on desktop / static on mobile), 9 rail ticks with the rail and nav agreeing on
-the current section, screen-blended pointer light, floating label facts, conic card edges, the footer
-wordmark, the four %DV meters plus the dashed no-DV track, **absence** of the FAQ/Evidence sections and
-their dead CSS, counters resolving to real values, zero horizontal overflow at 1440 and 390, and zero
-console errors.
-The `r*` captures split by context on purpose: `r1` is taken under `prefers-reduced-motion`, so it shows the
-page a motion-sensitive visitor gets (no chips, no drift), while `r14-hero-live.png` shows the same hero with
-the motion layer on — compare them before calling a difference a bug. `npm run parallax` (10 checks) measures what a static audit cannot: that the headline and the product stage actually drift at different rates while scrolling, that the progress bar tracks scroll, that parallax adds no horizontal overflow, and that under `prefers-reduced-motion: reduce` no `--py` offset is written at all.
-
-It needs Chromium once: `npx playwright install chromium` (plus `sudo npx playwright install-deps chromium` for the system libraries).
+If the mesh is wanted again, the work is in `git log` (commits `fff379d` and `37666dd`, including
+`scripts/spin.mjs`: 38 frame-hash checks that asserted both render layers and re-measured the
+bottle against the photo), and the trade-offs recorded there still apply: +~530 KB in the
+single-file artifact, `preserveDrawingBuffer` so the gates could read frames, and a driver-level
+`texImage3D` rejection from three's PMREM on WebKit.
 
 ## One self-contained file
 

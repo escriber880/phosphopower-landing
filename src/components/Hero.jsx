@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { brand, hero } from '../data/site.js'
-import Bottle3D from './Bottle3D.jsx'
 import { Arrow } from './Icons.jsx'
 import Orbs from './Orbs.jsx'
 import Kinetic from './Kinetic.jsx'
@@ -21,9 +19,6 @@ const PILL_STYLE = [
 
 export default function Hero() {
   const [eyebrowRef, eyebrow] = useScramble(hero.eyebrow, { speed: 20, hold: 120 })
-  // lifted here, not kept inside the canvas: the figure's caption has to change with the
-  // mode, and a class on the figure does that without :has() or a portal
-  const [mode, setMode] = useState('spin')
 
   return (
     <section className="hero" id="top">
@@ -72,10 +67,9 @@ export default function Hero() {
           <span className="hero-halo" aria-hidden="true" />
           <span className="hero-ring" aria-hidden="true" />
           <Reveal className="product-shell" delay={200}>
-            <figure className={`product-card${mode === 'spin' ? ' is-spin' : ''}`} data-tilt data-edit={import.meta.env.DEV ? 'Replace with your own studio shot (public/product.png)' : undefined}>
+            <figure className="product-card" data-tilt data-edit={import.meta.env.DEV ? 'Replace with your own studio shot (public/product.png)' : undefined}>
               <span className="product-tag">Current retail unit</span>
               <img className="product-img" src="/product.png" alt={hero.photoCaption} width="1600" height="1600" />
-              <Bottle3D mode={mode} onMode={setMode} />
               <figcaption className="product-cap">{hero.photoCaption}</figcaption>
             </figure>
           </Reveal>

@@ -166,8 +166,6 @@ for (const [name, mod] of ENGINES) {
            come out as a black rectangle — and `display:none` on it is not enough, the
            photograph underneath is held at opacity:0 while 3D is on, so the print would
            show an empty card. Both halves are asserted. */
-        spinCanvas: vis('.spin-canvas'),
-        spinChrome: vis('.spin-modes') + '/' + vis('.spin-flag') + '/' + vis('.spin-hint'),
         productImg: (() => {
           const el = document.querySelector('.product-img')
           return el ? `${getComputedStyle(el).display}/${getComputedStyle(el).opacity}` : 'absent'
@@ -236,7 +234,7 @@ for (const r of rows) {
   line('touch: pointer fx off', !r.touch.light && r.touch.mx === 'unset' && r.touch.finePointer === false, `fine=${r.touch.finePointer} light=${!r.touch.light ? 'not mounted' : 'MOUNTED'}`)
   line('touch: layout intact', r.touch.heroClip && r.touch.stackPos === 'static' && r.touch.scrollyCols.trim().split(/\s+/).length === 1, `overflow=${r.touch.overflow} stack=${r.touch.stackPos} cols=${r.touch.scrollyCols}`)
   line('print: chrome removed', r.print.nav === 'none' && r.print.ticker === 'none' && r.print.stackPos === 'static', `nav=${r.print.nav} stack=${r.print.stackPos}${r.pdfKB ? ` · pdf ${r.pdfKB}KB` : ''}`)
-  line('print: turntable hands the card back to the photograph', r.print.spinCanvas === 'none' && r.print.spinChrome === 'none/none/none' && r.print.productImg === 'block/1', `canvas=${r.print.spinCanvas} chrome=${r.print.spinChrome} img=${r.print.productImg}`)
+  line('print: the photograph prints at full opacity', r.print.productImg === 'block/1', `img=${r.print.productImg}`)
   line('zero errors', r.errors === 0, `${r.errors}${r.errorSamples.length ? ' · ' + r.errorSamples.join(' | ') : ''}`)
 }
 
