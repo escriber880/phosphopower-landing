@@ -607,8 +607,24 @@ em {
   outline: 2px solid rgba(224, 189, 107, 0.9);
   outline-offset: 3px;
 }
+.product-card .product-img {
+  /* One job: be the picture. The parallax rides this image on a translateZ(40px) plane,
+     so its hit area is bigger than what you see and it reaches over the card's own
+     stacking order — z-index: 3 on the 3D | Photo switch never won, because a composited
+     3D plane is not beaten by paint order. It was swallowing the click meant for the
+     switch in both directions, and an <img> with no handler has no business being a
+     click target. */
+  pointer-events: none;
+}
 .product-card.is-spin .product-img {
   opacity: 0;
+  /* Invisible has to mean untouchable too. The parallax rides this image on a
+     translateZ(40px) plane, so its hit area is bigger than what you see and it sits in
+     front of the card's own stacking order: z-index: 3 on the switch never won, because
+     a composited 3D plane is not beaten by paint order. While the turntable was up the
+     image was swallowing the click meant for 3D | Photo — and an opacity:0 control that
+     steals pointer events is a bug even before a11y gets a say. */
+  pointer-events: none;
 }
 .product-card .product-img,
 .product-card .product-cap {
@@ -616,6 +632,7 @@ em {
 }
 .product-card.is-spin .product-cap {
   opacity: 0;
+  pointer-events: none;
 }
 .spin-modes {
   position: absolute;

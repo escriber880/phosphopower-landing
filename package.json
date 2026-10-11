@@ -17,11 +17,12 @@
     "voice": "node scripts/voice-scan.mjs",
     "standalone": "vite build && node scripts/inline.mjs",
     "verify": "node scripts/verify-standalone.mjs",
-    "deploy:sync": "npm run standalone && node -e \"const fs=require('fs');fs.mkdirSync('deploy',{recursive:true});fs.copyFileSync('standalone/PhosphoPower-landing.html','deploy/index.html');console.log('\u2713 deploy/index.html refreshed')\""
+    "deploy:sync": "npm run standalone && node -e \"const fs=require('fs');fs.mkdirSync('deploy',{recursive:true});fs.copyFileSync('standalone/PhosphoPower-landing.html','deploy/index.html');console.log('✓ deploy/index.html refreshed')\""
   },
   "dependencies": {
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

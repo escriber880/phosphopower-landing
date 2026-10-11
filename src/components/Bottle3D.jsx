@@ -4,6 +4,16 @@ import { hero } from '../data/site.js'
    build carries the wrap without ever gaining an absolute reference the standalone gate
    would (rightly) reject. Same string in dev and in the artifact — one code path. */
 import wrapUrl from '../assets/label-wrap.jpg?inline'
+import { createBottle, hasWebGL } from '../lib/bottleMesh.js'
+import {
+  FIT_CAP_F,
+  FIT_LABEL_V,
+  FIT_T_OVER_W,
+  LIGHT_ANGLE,
+  RIM_BULGE,
+  SPEC_STRENGTH,
+  WRAP_SPAN,
+} from '../lib/bottleMeasure.js'
 
 const TAU = Math.PI * 2
 
@@ -13,17 +23,20 @@ const TAU = Math.PI * 2
    θ = asin((x − cx)/R) + φ derives the crowding of texture near the silhouette
    instead of faking it with a dark edge — that crowding is what makes a printed label
    read as a solid. Only the near hemisphere is visible, so every column has exactly one
-   answer. The label does not close on itself: the artwork's own aspect (1026×469 ⇒
-   circumference / label height = 2.19) against the photographed unit's proportions
-   puts the printed wrap at ~88% of the turn, so u spans ±(SPAN·τ)/2 and the rest is
-   bare plastic, which is what a glued wrap actually looks like.            */
-const SPAN = 0.88
-const TOverW = 1.7 // total height / visible width, from the photographed unit
-const LABEL_V = 0.74 // share of the total height the printed label covers
+   answer. The label does not close on itself: the artwork's own aspect against the
+   measured band height puts the printed wrap at WRAP_SPAN of the turn (see
+   bottleMeasure.js), so rel spans ±(SPAN·τ)/2 and the rest is bare plastic, which is
+   what a glued wrap actually looks like.
+   Every constant below is measured, imported, and shared with the WebGL layer, so the
+   painter and the mesh cannot drift into two different bottles.               */
+const SPAN = WRAP_SPAN
+const TOverW = FIT_T_OVER_W // total height / visible width
+const LABEL_V = FIT_LABEL_V // share of the total height the printed label covers
+const CAP_F = FIT_CAP_F // cap's share of the band above the label
 const RIBS = 44
-const LIGHT = -0.62
-const SPEC = 0.34
-const RIM = 0.055 // elliptical bulge of the top and bottom rims, as a share of R
+const LIGHT = LIGHT_ANGLE
+const SPEC = SPEC_STRENGTH
+const RIM = RIM_BULGE // elliptical bulge of the top and bottom rims, as a share of R
 
 // angle (−π..π) of a surface point relative to the viewer
 const wrapAngle = (a) => ((((a + Math.PI) % TAU) + TAU) % TAU) - Math.PI
@@ -39,10 +52,10 @@ function frame(φ, w, h) {
   const R = W / 2
   const top = (h - T) / 2
   const labelH = LABEL_V * T
-  const capH = (1 - LABEL_V) * T * 0.62
+  const capH = (1 - LABEL_V) * T * CAP_F
   const labelTop = top + capH
   const labelBot = labelTop + labelH
-  const baseH = (1 - LABEL_V) * T * 0.38
+  const baseH = (1 - LABEL_V) * T * (1 - CAP_F)
   const ry = R * RIM
   const cols = []
   for (let x = cx0(w) - R; x <= cx0(w) + R; x += 1) {
@@ -153,7 +166,12 @@ function paint(ctx, tex, φ, w, h, dpr) {
   return wrapAngle(φ)
 }
 
+/* Inside the printed wrap the caption follows the panel the artwork puts at the
+   centre of the view. Outside it there is no panel to name: the wrap does not close
+   on itself, so rel beyond span/2 is bare plastic — and because the band is only
+   WRAP_SPAN of a turn, that is what the viewer sees for most of a half turn. */
 function panelOf(rel, span) {
+  if (Math.abs(rel) > span / 2) return hero.spin.panels[3]
   const f = 0.5 + rel / span
   if (f > 0.34 && f < 0.66) return hero.spin.panels[0]
   if (f > 0.04 && f <= 0.34) return hero.spin.panels[1]
@@ -173,6 +191,12 @@ export default function Bottle3D({ mode, onMode }) {
   const reduce = useRef(false)
   const [panel, setPanel] = useState(hero.spin.panels[0])
   const [ready, setReady] = useState(false)
+  /* Which renderer owns the canvas. Decided before anything calls getContext: a canvas
+     that has handed out a 2D context can never be given a WebGL one, so a late upgrade
+     would be impossible and a wrong guess permanent. */
+  const [layer, setLayer] = useState(() => (hasWebGL() ? 'mesh' : 'flat'))
+  const mesh = useRef(null)
+  const sized = useRef('')
 
   const sync = useCallback((rel, span) => {
     const next = panelOf(rel, span)
@@ -186,12 +210,24 @@ export default function Bottle3D({ mode, onMode }) {
   // rAF loop in the hero is a battery drain and a reduced-motion violation
   const draw = useCallback(() => {
     const c = cvs.current
-    const t = tex.current
-    if (!c || !t) return
-    const dpr = Math.min(2, window.devicePixelRatio || 1)
+    if (!c) return
     const w = c.clientWidth
     const h = c.clientHeight
     if (!w || !h) return
+    const m = mesh.current
+    if (m) {
+      const key = `${w}x${h}`
+      if (sized.current !== key) {
+        sized.current = key
+        m.resize(w, h)
+      }
+      m.render(φ.current)
+      sync(wrapAngle(φ.current), TAU * SPAN)
+      return
+    }
+    const t = tex.current
+    if (!t) return
+    const dpr = Math.min(2, window.devicePixelRatio || 1)
     if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
       c.width = Math.round(w * dpr)
       c.height = Math.round(h * dpr)
@@ -232,6 +268,38 @@ export default function Bottle3D({ mode, onMode }) {
   const kick = useCallback(() => engine.current?.(), [])
 
   useEffect(() => {
+    if (layer !== 'mesh' || mode !== 'spin' || !cvs.current) return
+    let mounted = true
+    let inst = null
+    try {
+      inst = createBottle(cvs.current, wrapUrl, () => mounted && setReady(true))
+    } catch {
+      /* No context, no extension, a driver that said no: the 2D projection is the
+         product, not the consolation prize, so step down and stay quiet about it. The
+         handover is deferred by a microtask because a throw here is a runtime failure and
+         not a render-time dependency — React's own purity rule objects to a synchronous
+         setState in an effect body, and it is right to: nothing may depend on the layer
+         being settled before the next line of this effect. */
+      queueMicrotask(() => mounted && setLayer('flat'))
+      return
+    }
+    mesh.current = inst
+    const el = cvs.current
+    sized.current = `${el.clientWidth}x${el.clientHeight}`
+    inst.resize(el.clientWidth, el.clientHeight)
+    /* No setReady here: readiness belongs to the texture arriving (createBottle's own
+       callback), and a synchronous setState in this effect body is a cascading render the
+       compiler warns about. */
+    inst.render(φ.current)
+    return () => {
+      mounted = false
+      mesh.current = null
+      sized.current = ''
+      inst.dispose()
+    }
+  }, [layer, mode])
+
+  useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     reduce.current = mq.matches
     const on = () => {
@@ -241,21 +309,31 @@ export default function Bottle3D({ mode, onMode }) {
     const img = new Image()
     img.onload = () => {
       tex.current = img
-      setReady(true)
+      // ready belongs to whichever path is live; the image is decoded either way, it is
+      // the fallback and the photograph is one click away
+      if (layer === 'flat') setReady(true)
     }
     // a stage with nothing in it is worse than the photograph: fall back, silently
     img.onerror = () => onMode('photo')
     img.src = wrapUrl
-    const ro = new ResizeObserver(() => draw())
+    const ro = new ResizeObserver(() => {
+      sized.current = ''
+      draw()
+    })
     if (cvs.current) ro.observe(cvs.current)
     return () => {
       mq.removeEventListener('change', on)
       ro.disconnect()
       if (raf.current) cancelAnimationFrame(raf.current)
     }
-  }, [draw, onMode])
+  }, [draw, onMode, layer])
 
   // a quarter-arc settle the first time the stage is on screen: it announces that the
+  /* The swing owns φ only until the visitor touches the stage: a keyboard press or a
+     grab that is silently overwritten by a decorative animation is a real input bug, and
+     the gate that counts ArrowRight presses would otherwise be racing an easing curve. */
+  const intro = useRef(0)
+
   // object is solid. Once, on intersection only, and never under reduced motion.
   useEffect(() => {
     if (!ready) return
@@ -268,9 +346,11 @@ export default function Bottle3D({ mode, onMode }) {
       (entries) => {
         if (!entries[0].isIntersecting) return
         io.disconnect()
+        const token = intro.current
         const t0 = performance.now()
         const swing = (k) => 0.8 * Math.pow(1 - k, 3) * Math.cos(k * 1.35)
         function ease() {
+          if (intro.current !== token) return // handed over to the visitor mid-swing
           const k = Math.min(1, (performance.now() - t0) / 1500)
           φ.current = swing(k)
           draw()
@@ -294,6 +374,7 @@ export default function Bottle3D({ mode, onMode }) {
     return Math.min((h * 0.94) / TOverW / 2, (c.clientWidth * 0.92) / 2) || 1
   }
   const onDown = (e) => {
+    intro.current += 1
     drag.current = { x: e.clientX, t: performance.now() }
     vel.current = 0
     e.currentTarget.setPointerCapture?.(e.pointerId)
@@ -318,6 +399,7 @@ export default function Bottle3D({ mode, onMode }) {
     kick()
   }
   const onKey = (e) => {
+    intro.current += 1
     const step = e.shiftKey ? 0.34 : 0.085
     if (e.key === 'ArrowLeft') φ.current -= step
     else if (e.key === 'ArrowRight') φ.current += step
@@ -348,6 +430,7 @@ export default function Bottle3D({ mode, onMode }) {
           data-spin-ready={ready ? '1' : '0'}
           data-mode={mode}
           data-touch-target="spin"
+        data-layer={layer}
           tabIndex={mode === 'spin' ? 0 : -1}
           role="img"
           aria-label={`${hero.spin.aria} Currently facing the viewer: ${panel}.`}

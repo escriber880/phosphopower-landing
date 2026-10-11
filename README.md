@@ -49,11 +49,32 @@ npm run deploy:sync && npm run verify   # rebuild the single file, then gate the
 
 ## The 3D bottle
 
-The hero's product card renders the **printed label artwork wrapped on a cylinder** in a 2D
-canvas: one source column sampled per screen column through `θ = asin(dx/R) + φ`, which derives
-the crowding of the print near the silhouette instead of painting a gradient over it. No WebGL,
-no dependency, no extra request. Drag, arrow keys (Shift for a bigger step, Home for the front),
-or the `3D / Photo` toggle; `touch-action: pan-y` keeps vertical scrolling native on a phone.
+The hero's product card is a turntable with **two render layers over one texture**. Where a
+real WebGL2 context answers, `src/lib/bottleMesh.js` builds the package as geometry — a lathe
+body, a ribbed screw cap, and the label as a cylinder cut to the share of a turn the artwork
+actually covers — lit by a warm key at the painter's azimuth, a cool rim and a hemisphere fill.
+Where it does not (headless Firefox has no WebGL at all, and so will any visitor whose driver
+says no), `src/components/Bottle3D.jsx` paints the same wrap column by column in a 2D canvas:
+one source column per screen column through `θ = asin(dx/R) + φ`, which derives the crowding of
+the print near the silhouette instead of painting a gradient over it. The layer is chosen before
+a context is requested, a throw inside `createBottle` steps down to the painter, and
+`npm run spin` asserts both paths: the layer that matches the engine, the front panel centred at
+rest, bare plastic past the seam, the same panel names, byte-identical frames on `Home`.
+
+Nothing is loaded to build it — no CDN, no font, no image request — and the geometry is not
+eyeballed: `python3 scripts/measure-bottle.py` reads the bottle's proportions out of
+`public/product.png` and `src/lib/bottleMeasure.js` is the only place those numbers live, so the
+mesh and the painter cannot drift into two different bottles, and the gate re-runs the measurement
+and fails if the constants no longer match the photograph.
+
+Two consequences are worth knowing before you "fix" them. The single-file artifact carries
+three.js inline, so it is ~1.28 MB instead of ~723 KB (`externalRequests` stays 0); dropping
+`three` from the standalone build is a one-line change in `scripts/inline.mjs` if the size
+matters more to you than the mesh in the downloaded file. And `shots` reports two warnings —
+`GPU stall due to ReadPixels`, because the *gate* reads the canvas with `toDataURL` under
+`preserveDrawingBuffer: true`, and `CONTEXT_LOST_WEBGL` when the `3D / Photo` switch disposes the
+renderer. Both are the harness and the toggle doing their job; no visitor's page emits them.
+
 
 The texture is a **derived file**: `python3 scripts/prepare-wrap.py` reads the supplied artwork
 and writes `src/assets/label-wrap.jpg`, cutting the fine-print block out of the left panel,
