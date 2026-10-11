@@ -373,9 +373,6 @@ export const social = {
     'Every batch: what went in, who milled it, what the assay said — posted when the lot ships.',
     'Formula changes get a dated change log with the reason, not a silent new carton.',
     '“What is Calcium AEP?” — the 40-second ingredient series, one molecule per episode.',],
-  verify:
-    'Confirm each handle is really yours before printing it. The name PhosphoPower is already in use by unrelated accounts, so link only to profiles you control and can log into.',
-  verifyTitle: 'Before you publish these handles',
 }
 
 export const contact = {
