@@ -159,18 +159,17 @@ await mob.evaluate(() => document.querySelector('.nav-toggle').click())
 await mob.waitForTimeout(500)
 await mob.screenshot({ path: `${OUT}/10-mobile-nav.png` })
 
-// ── contact form live check ────────────────────────────────────────────────
+// ── the support line (the documentation-pack form was retired) ─────────────
 await page.evaluate(() => document.querySelector('#contact').scrollIntoView())
-await page.fill('#f-name', 'Jordan Avery')
-await page.fill('#f-email', 'jordan@domain.com')
-await page.check('#f-consent')
-await page.click('.form-card button[type="submit"]')
 await page.waitForTimeout(300)
-const formOk = await page.evaluate(() => !!document.querySelector('.form-ok'))
-await page.screenshot({ path: `${OUT}/11-form-sent.png` })
+const contactOk = await page.evaluate(() => ({
+  forms: document.querySelectorAll('#contact form, .form-card').length,
+  mailto: document.querySelector('.ask-card a[href^="mailto:"]')?.getAttribute('href') || null,
+}))
+await page.screenshot({ path: `${OUT}/11-contact.png` })
 
 console.log('── runtime audit ─────────────────────────────')
-console.log(JSON.stringify({ ...audit, drift, editMode, mobileOverflowPx: mobileOverflow, formOk }, null, 2))
+console.log(JSON.stringify({ ...audit, drift, editMode, mobileOverflowPx: mobileOverflow, contactOk }, null, 2))
 console.log('── errors (%d) ────────────────────────────────', errors.length)
 errors.slice(0, 12).forEach((e) => console.log(' ✗', e))
 console.log('── warnings (%d) ──────────────────────────────', warnings.length)

@@ -15,7 +15,7 @@ const SECTIONS = [
   ['reviews', '06', 'Reviews'],
   ['quality', '07', 'Manufacturing'],
   ['social', '08', 'Channels'],
-  ['contact', '09', 'Request docs'],
+  ['contact', '09', 'Ask a question'],
 ]
 
 export default function Rail() {

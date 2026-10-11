@@ -1035,6 +1035,48 @@ em {
   line-height: 1.6;
   color: #3c4356;
 }
+/* the one inbox: a mailto CTA and the boundary that used to sit under a submit
+   button. Typed for the dark section, because .paper-card belongs to the cream
+   Supplement Facts panel and a white card here looks unstyled. */
+.ask-card {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 2.2vw, 2rem);
+  margin-left: auto;
+  width: 100%;
+}
+
+.ask-card h3 {
+  margin: 0 0 0.6rem;
+  font: 500 1.16rem/1.3 var(--sans);
+  color: #fff;
+}
+
+.ask-card > p {
+  margin: 0 0 1.3rem;
+  color: var(--text-dim);
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.ask-card .btn {
+  align-self: flex-start;
+  /* the vertical auto (not the inline one) is what pushes the action group to the
+     base of a stretched card; the note follows it, so the free space lands between
+     the intro and the button instead of trailing the card */
+  margin: auto 0 1.3rem;
+}
+
+.ask-note {
+  margin: 0;
+  padding-top: 1.1rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--line-strong);
+  font: 400 0.74rem/1.6 var(--mono);
+  color: var(--text-dim);
+}
+
+
 .paper-list {
   display: grid;
   gap: 0.5rem;
@@ -1361,7 +1403,9 @@ em {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: clamp(1.6rem, 3.4vw, 3rem);
-  align-items: start;
+  /* stretch, not start: with the request form gone, a top-aligned card would end
+     ~220px short and read as a missing element rather than a decision */
+  align-items: stretch;
 }
 .channel-list {
   display: grid;
@@ -1398,141 +1442,10 @@ em {
   font-style: normal;
   color: var(--text);
 }
-.form-card {
-  padding: clamp(1.4rem, 2.6vw, 2.1rem);
-}
-.form-card h3 {
-  margin: 0 0 0.45rem;
-  font-family: var(--serif);
-  font-size: 1.5rem;
-  letter-spacing: -0.02em;
-  color: #fff;
-}
-.form-card > p {
-  margin: 0 0 1.5rem;
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--text-dim);
-  max-width: 56ch;
-}
-.field-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
-.field {
-  display: grid;
-  gap: 0.4rem;
-}
-.field--full {
-  grid-column: 1 / -1;
-}
-.field label {
-  font: 500 0.64rem/1 var(--mono);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  appearance: none;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  background: rgba(5, 9, 20, 0.55);
-  color: var(--text);
-  font: 400 0.92rem/1.4 var(--sans);
-  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
-}
-.field textarea {
-  min-height: 96px;
-  resize: vertical;
-}
-.field select {
-  background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%),
-    linear-gradient(135deg, var(--gold) 50%, transparent 50%);
-  background-position: calc(100% - 19px) 52%, calc(100% - 14px) 52%;
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-}
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
-  outline: none;
-  border-color: var(--gold);
-  background: rgba(224, 189, 107, 0.05);
-  box-shadow: 0 0 0 4px rgba(224, 189, 107, 0.1);
-}
-.field input::placeholder,
-.field textarea::placeholder {
-  color: #4c5a78;
-}
-.consent {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.7rem;
-  align-items: start;
-  margin-top: 1.2rem;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--text-dim);
-}
-.consent input {
-  width: 16px;
-  height: 16px;
-  margin-top: 0.2rem;
-  accent-color: var(--gold);
-}
-.form-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.4rem;
-}
-.form-note {
-  margin: 0;
-  max-width: 34ch;
-  font-size: 0.76rem;
-  line-height: 1.5;
-  color: var(--text-faint);
-}
-.form-ok {
-  padding: 1.4rem;
-  border: 1px solid rgba(71, 214, 155, 0.4);
-  border-radius: var(--r-md);
-  background: rgba(71, 214, 155, 0.08);
-  color: #d9f0e4;
-  font-size: 0.92rem;
-}
-.form-ok b {
-  display: block;
-  margin-bottom: 0.4rem;
-  color: #fff;
-}
 
-.form-ok p {
-  margin: 0 0 0.9rem;
-  color: var(--text-dim);
-}
 
-.form-ok .btn {
-  margin-bottom: 0.9rem;
-}
 
 /* what the mail client will be handed, shown so nothing is sent unseen */
-.form-draft {
-  margin: 0;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  background: rgba(3, 7, 18, 0.55);
-  font: 400 0.74rem/1.65 var(--mono);
-  color: var(--text-dim);
-  white-space: pre-wrap;
-}
 
 /* ── footer ─────────────────────────────────────────────────────────────── */
 
@@ -1914,9 +1827,6 @@ em {
   .bento .b-sm,
   .bento .b-full {
     grid-column: 1 / -1;
-  }
-  .field-grid {
-    grid-template-columns: minmax(0, 1fr);
   }
   .cta-row .btn {
     flex: 1 1 100%;

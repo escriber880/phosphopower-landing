@@ -29,12 +29,13 @@ npm run shots    # headless-Chromium visual + runtime audit (see below)
 npm run design   # design-layer checks + r*.png captures (see below)
 npm run parallax # measures the scroll-parallax rates in a real browser
 npm run voice    # scans the rendered copy for regulatory/agency language
+npm run contact    # asserts the support line works and no form machinery survived
 npm run cross    # same contract in Chromium + Firefox + WebKit, plus touch and print
 ```
 
 `npm run shots` drives the dev server with Playwright: it fails on any console error, page error or failed request, asserts the structural counts
 (10 `<section>` elements of which 9 are numbered 01→09, 4 ingredient cards, 4 quote cards, 4 social cards), checks that the computed
-%DV values reach the DOM, measures horizontal overflow at 1440px and 390px, clicks the placeholder-audit toggle, and writes PNGs to `shots/` (numbered `00–07` for the flow, `09–13` for mobile, form and the standalone file, `r1–r14` for the design layer). It renders with
+%DV values reach the DOM, measures horizontal overflow at 1440px and 390px, clicks the placeholder-audit toggle, and writes PNGs to `shots/` (numbered `00–07` for the flow, `09–13` for mobile, the contact section and the standalone file, `r1–r14` for the design layer). It renders with
 `reducedMotion: 'reduce'` so scroll-reveal elements are visible in a full-page capture instead of sitting at `opacity: 0`.
 
 ```bash
@@ -123,7 +124,7 @@ src/
 
 Sections, in order: hero (product photo on its own drifting plane) → product ticker → 01 positioning stats → 02 formula (what each nutrient is
 documented to contribute to) → 03 the name (“Calcium AEP = phosphoethanolamine, one ingredient not two”) → 04 Supplement Facts panel (paper break) →
-05 who it is for + timing-with-medication caution → 06 customer reviews → 07 manufacturing → 08 social channels → 09 documentation request form → footer.
+05 who it is for + timing-with-medication caution → 06 customer reviews → 07 manufacturing → 08 social channels → 09 one support inbox (mailto, no form) → footer.
 
 The FAQ (“Common questions”) and “The record” (known-vs-assumed ledger) sections were removed at the owner's request, together with the editorial
 asides that used to sit under them: the naming origin story, the testimonial disclosure paragraph, the per-ingredient `note` prose, the second
@@ -246,11 +247,12 @@ After the first deploy:
    DNS resolves. No `rel="canonical"` is in `index.html` yet: add
    `<link rel="canonical" href="https://www.phosphopower.com/" />` only once that origin actually serves the site
    — a canonical to a domain that does not resolve tells search engines to prefer nothing.
-2. **The form** — `Contact.jsx` builds a prefilled `mailto:` to the address printed on the bottle and shows the
-   draft, because a static bundle has nowhere to POST. `Request logged` would have been a lie about a record that
-   does not exist. When you add a real endpoint, replace `onSubmit` with a `fetch()`; the `.form-ok` branch is the
-   only other thing that moves.
-3. **Re-run the gates before pushing** — `npm run deploy:sync && npm run design && npm run cross`, then commit.
+2. **Support, not a form** — there is no request form and no documentation-pack workflow. `#contact` prints the
+   one inbox (`nthsupplements@gmail.com`) and `Contact.jsx` hands over a bare `mailto:`, because a static bundle
+   has nowhere to POST and a "Request logged" panel would describe a record that does not exist. The page does not
+   call the line "monitored" either — that is a promise about staffing, not a label fact. If you later add a real
+   endpoint, rebuild a small form in `#contact` and restore a submit-time gate in `scripts/contact.mjs`.
+3. **Re-run the gates before pushing** — `npm run deploy:sync && npm run design && npm run contact && npm run cross`, then commit.
    `scripts/verify-standalone.mjs` additionally refuses to pass if `<title>`, the meta tags or `<noscript>` carry
    a claim the panel no longer supports (it greps the shipped artifact for `chelated`, `bisglycinate`,
    `vegetarian`, `1,000 mg`, `data-edit="` and dead contact addresses) — that hand-written head copy is where a

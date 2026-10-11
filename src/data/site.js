@@ -399,16 +399,19 @@ export const social = {
 export const contact = {
   kicker: '09 — Care',
   title: 'Product, lot, COA and label questions.',
-  sub: 'Customer care answers questions about composition, timing with food, sourcing and batch documentation, and forwards anything clinical to the right professional.',
+  sub: 'One inbox, answered by the people who specify the formula: composition, timing with food, sourcing and what a given lot was tested for. Anything clinical gets forwarded to the right professional, not answered here.',
   channels: [
     { label: 'Email', value: brand.email, href: `mailto:${brand.email}` },
     { label: 'Location', value: brand.address },
-    { label: 'Adverse events', value: `Report to ${brand.email} — monitored line`, href: `mailto:${brand.email}` },
+    { label: 'Adverse events', value: `Report to ${brand.email}`, href: `mailto:${brand.email}` },
   ],
-  form: {
-    title: 'Request the documentation pack',
-    body: 'Full label artwork, current COA, ingredient spec sheets with CoAs, and the allergen statement — one PDF, sent by email.',
-    interests: ['COA for a specific lot', 'Retail / wholesale', 'Ingredient sourcing', 'Label artwork'],
+  write: {
+    title: 'Write to us',
+    body:
+      'Put the lot number printed on the base of the bottle in the subject line and we can answer about your specific batch instead of the product in general.',
+    cta: 'Open a blank email',
+    note:
+      'No purchase is made on this page. Do not send symptoms, diagnoses or medication lists — that creates a medical-relationship expectation we cannot legally meet.',
   },
 }
 

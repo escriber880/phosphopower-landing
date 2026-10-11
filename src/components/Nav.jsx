@@ -56,12 +56,12 @@ export default function Nav() {
             </a>
           ))}
           <a href="#contact" onClick={() => setOpen(false)}>
-            Request docs <Arrow />
+            Ask a question <Arrow />
           </a>
         </nav>
 
         <a className="btn btn-primary btn-sm nav-cta" href="#contact" data-magnetic>
-          Documentation pack
+          Email support
         </a>
 
         <button
