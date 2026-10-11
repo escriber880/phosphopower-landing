@@ -266,6 +266,12 @@ are a reconstruction**, not your certificate of analysis.
 
 ## Deploy (Render)
 
+**Repository:** `https://github.com/escriber880/phosphopower-landing` — private, `main` is the live branch, first
+pushed from this workspace on 2026-10-11 at the commit that fixed the README paths. The remote URL carries no
+secret: credentials come from `gh auth login` + `gh auth setup-git`, so `git push` works in any shell where
+`GH_CONFIG_DIR` points at the gh config. `render.yaml` is in the tree, so Render reads it as a Blueprint.
+
+
 `render.yaml` is a Render Blueprint: connecting the repo to Render creates the service from that file, so the
 build command, publish directory, Node pin and cache headers cannot be mistyped in a dashboard form. Two valid
 shapes, keep one:
