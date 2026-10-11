@@ -1443,6 +1443,39 @@ em {
   color: var(--text);
 }
 
+/* the back label prints an address this page does not offer, and anyone holding a
+   bottle will notice the mismatch. Stated in the contact list itself, in plain text:
+   a link here would put a second inbox in front of people who are not watching it. */
+.pack-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.55rem 1rem;
+  align-items: baseline;
+  margin: 0.85rem 0 0;
+  padding: 0.9rem 1.15rem;
+  border: 1px solid var(--line);
+  border-left: 2px solid rgba(224, 189, 107, 0.5);
+  border-radius: var(--r-sm);
+  background: rgba(5, 9, 20, 0.4);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+.pack-note b {
+  margin: 0;
+  font: 500 0.62rem/1.7 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(224, 189, 107, 0.85);
+}
+@media (max-width: 560px) {
+  /* the chip and the sentence stack; side by side at 390px leaves one word per line */
+  .pack-note {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+  }
+}
+
 
 
 /* what the mail client will be handed, shown so nothing is sent unseen */

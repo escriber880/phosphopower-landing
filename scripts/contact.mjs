@@ -30,6 +30,9 @@ const page = await p.evaluate(() => ({
   channelHref: document.querySelector('.channel-list a[href^="mailto:"]')?.getAttribute('href') || null,
   channels: [...document.querySelectorAll('.channel-list li')].map((li) => li.innerText.replace(/\s+/g, ' ')),
   askNote: document.querySelector('.ask-note')?.innerText || '',
+  packNote: document.querySelector('.pack-note')?.innerText.replace(/\s+/g, ' ').trim() || '',
+  packLinks: document.querySelectorAll('.pack-note a, a[href*="phosphopower.com"]').length,
+  mailtos: [...new Set([...document.querySelectorAll('a[href^="mailto:"]')].map((a) => a.getAttribute('href')))],
   bodyText: document.body.innerText.replace(/\s+/g, ' ').toLowerCase(),
   nav: [...document.querySelectorAll('.nav-links a, .nav-cta')].map((a) => a.innerText.replace(/\s+/g, ' ').trim()),
   rail: [...document.querySelectorAll('.rail-tick')].map((t) => t.getAttribute('aria-label') || t.innerText.replace(/\s+/g, ' ').trim()),
@@ -42,6 +45,11 @@ pass('email channel uses the same inbox', page.channelHref === `mailto:${brand.e
 pass('support inbox is the service address', page.channels.some((c) => /email/i.test(c) && c.includes(brand.email)), page.channels.join(' · '))
 pass('“monitored” is gone', !/monitored/i.test(page.bodyText), 'the page must not promise a watched line')
 pass('the doc-pack request is gone', !/documentation pack|request the documentation/.test(page.bodyText))
+/* the bottle prints a different address; the page now says so. The failure mode is
+   the note turning into a second contact link — naming an address and offering it are
+   different acts, and only one of them is ours to stand behind. */
+pass('the printed-address note is on the page', /contact@phosphopower\.com/.test(page.packNote) && /service inbox/.test(page.packNote), JSON.stringify(page.packNote.slice(0, 60)))
+pass('it is named as text, never linked', page.packLinks === 0 && page.mailtos.every((h) => h === `mailto:${brand.email}`), `links=${page.packLinks} mailtos=${page.mailtos.join(',')}`)
 pass('boundary note renders with the inbox', /medical|diagnos/i.test(page.askNote), JSON.stringify(page.askNote.slice(0, 48)))
 // innerText comes back uppercased by .nav-links { text-transform: uppercase }, so
 // label assertions must be case-insensitive or they fail on a correct page
@@ -62,12 +70,15 @@ await mp.evaluate(() => document.querySelector('.ask-note').scrollIntoView({ blo
 await mp.waitForTimeout(400)
 const m = await mp.evaluate(() => {
   const n = document.querySelector('.ask-note')
+  const pn = document.querySelector('.pack-note')
   const btn = document.querySelector('.ask-card .btn')
   const card = document.querySelector('.ask-card')
   if (!n || !card) return { missing: true }
   const r = n.getBoundingClientRect(), cr = card.getBoundingClientRect(), cs = getComputedStyle(n)
   const br = btn?.getBoundingClientRect()
+  const pr = pn?.getBoundingClientRect(), pcs = pn ? getComputedStyle(pn) : null
   return {
+    pack: pn ? { h: Math.round(pr.height), w: Math.round(pr.width), o: parseFloat(pcs.opacity || '1'), fs: pcs.fontSize } : null,
     height: Math.round(r.height),
     width: Math.round(r.width),
     opacity: parseFloat(cs.opacity || '1'),
@@ -81,6 +92,7 @@ const m = await mp.evaluate(() => {
   }
 })
 pass('mobile: note painted, not clipped by the glass card', !m.missing && m.height > 12 && m.width > 40 && m.opacity > 0.9 && !m.clipped && !m.btnClipped, JSON.stringify(m))
+pass('mobile: printed-address note is painted, not crushed', m.pack && m.pack.h > 12 && m.pack.w > 100 && m.pack.o > 0.9, JSON.stringify(m.pack))
 pass('mobile: CTA is tappable and nothing overflows', m.cta > 120 && m.overflow === 0, `cta=${m.cta}px overflow=${m.overflow}`)
 await mp.screenshot({ path: 'shots/11-contact-mobile.png' })
 

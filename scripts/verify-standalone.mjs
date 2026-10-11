@@ -31,6 +31,11 @@ const r = await p.evaluate(() => ({
   overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   cssApplied: getComputedStyle(document.body).backgroundColor,
   revealVisible: getComputedStyle(document.querySelector('.ing-card')).opacity,
+  /* structured data is not a link, so it needs its own read: both org blocks must
+      name the one service inbox and nothing else */
+  ldEmails: [...new Set([...document.querySelectorAll('script[type="application/ld+json"]')].flatMap((n) => [...(n.textContent || '').matchAll(/"email"\s*:\s*"([^"]+)"/g)].map((m) => m[1].trim().toLowerCase())))],
+  /* every inbox the artifact actually offers, deduplicated */
+  mailtoAddrs: [...new Set([...document.querySelectorAll('a[href^="mailto:"]')].map((a) => decodeURIComponent(a.getAttribute('href')).replace(/^mailto:/i, '').trim().toLowerCase()))],
 }))
 console.log(JSON.stringify({ ...r, errors: errors.length }, null, 2))
 errors.slice(0, 8).forEach((e) => console.log(' ✗', e))
@@ -54,6 +59,26 @@ if (!/vegan/i.test(head.desc + head.noscript)) drift.push('no "vegan" in descrip
 if (!head.noscript.includes(brand.email)) drift.push(`noscript is missing ${brand.email}`)
 if (!head.desc || head.desc.length > 170) drift.push(`description is ${head.desc.length} chars (want 1-170)`)
 if (!head.og.includes('label')) drift.push('og:description lost its label promise')
+/* The back label prints a different address and the contact section says so in words.
+   Naming it is fine; offering it is not — a static bundle cannot stand behind an inbox
+   nobody watches, so the printed address must never reach an href. Checked twice: in
+   the live DOM (links React renders) and in the raw bytes (the <noscript> fallback is
+   inert text while JS runs, so a querySelector never sees it). */
+const PRINTED = 'contact@phosphopower.com'
+if (r.mailtoAddrs.length !== 1 || r.mailtoAddrs[0] !== brand.email.toLowerCase())
+  drift.push(`rendered mailto set is ${JSON.stringify(r.mailtoAddrs)}, want only ${brand.email}`)
+/* Only markup attributes here. A loose /mailto:[^"'\s>]+/ over the bundle also walks
+   into the minified JS, where a template literal is still `mailto:${d.email}` — that
+   is a source artifact, not a link, and a gate that fails on it gets disabled. The
+   rendered links are covered by mailtoAddrs above, which sees real hrefs. */
+const rawMailtos = [...new Set([...raw.matchAll(/href="mailto:([^"]+)"/gi)].map((m) => m[1].trim().toLowerCase()))]
+if (rawMailtos.some((a) => a !== brand.email.toLowerCase()))
+  drift.push(`markup links a second inbox: ${rawMailtos.filter((a) => a !== brand.email.toLowerCase()).join(', ')}`)
+if (!(r.ldEmails.length === 1 && r.ldEmails[0] === brand.email.toLowerCase()))
+  drift.push(`JSON-LD emails are ${JSON.stringify(r.ldEmails)}, want only ${brand.email}`)
+if (raw.includes(`href="mailto:${PRINTED}`) || raw.includes(`mailto:${PRINTED}`))
+  drift.push(`${PRINTED} is linked — it may appear as text only`)
+if (!raw.includes(PRINTED)) drift.push(`the printed-address note vanished from the artifact: ${PRINTED}`)
 if (drift.length) {
   console.error('✗ HEAD DRIFT: ' + drift.join(' · '))
   await b.close()

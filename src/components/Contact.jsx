@@ -34,6 +34,15 @@ export default function Contact() {
                 </li>
               ))}
             </ul>
+
+            {/* plain text, never an href: the printed address is named so the bottle and
+                the page reconcile, not offered as a second inbox. Inside the column's
+                Reveal on purpose — a nested one would animate twice and could sit
+                opacity:0 under its own observer. */}
+            <p className="pack-note">
+              <b>On the bottle</b>
+              {contact.printed}
+            </p>
           </Reveal>
 
           <Reveal className="ask-card glass glass--asym" delay={90}>

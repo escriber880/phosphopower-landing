@@ -15,6 +15,7 @@
     "cross": "node scripts/cross-check.mjs",
     "voice": "node scripts/voice-scan.mjs",
     "standalone": "vite build && node scripts/inline.mjs",
+    "verify": "node scripts/verify-standalone.mjs",
     "deploy:sync": "npm run standalone && node -e \"const fs=require('fs');fs.mkdirSync('deploy',{recursive:true});fs.copyFileSync('standalone/PhosphoPower-landing.html','deploy/index.html');console.log('\u2713 deploy/index.html refreshed')\""
   },
   "dependencies": {

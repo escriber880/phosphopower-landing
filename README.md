@@ -29,8 +29,10 @@ npm run shots    # headless-Chromium visual + runtime audit (see below)
 npm run design   # design-layer checks + r*.png captures (see below)
 npm run parallax # measures the scroll-parallax rates in a real browser
 npm run voice    # scans the rendered copy for regulatory/agency language
-npm run contact    # asserts the support line works and no form machinery survived
+npm run contact  # asserts the support line works and no form machinery survived
 npm run cross    # same contract in Chromium + Firefox + WebKit, plus touch and print
+npm run verify   # loads the built single file over file:// — no server — and fails on
+                 # any drift between the shipped head, the JSON-LD and the panel
 ```
 
 `npm run shots` drives the dev server with Playwright: it fails on any console error, page error or failed request, asserts the structural counts
@@ -41,9 +43,10 @@ npm run cross    # same contract in Chromium + Firefox + WebKit, plus touch and 
 ```bash
 npm run dev &     # the shot scripts expect the dev server on :5173
 npm run shots && npm run design && npm run parallax && npm run cross
+npm run deploy:sync && npm run verify   # rebuild the single file, then gate the artifact
 ```
 
-`npm run design` covers the design layer (**29 checks**): aurora mesh + inert grain, exactly 9 drifting
+`npm run design` covers the design layer (**30 checks**): aurora mesh + inert grain, exactly 9 drifting
 numerals numbered 01→09 with no gaps, the word masks actually opening and carrying a text stroke, two
 marquees with duplicated rows that are *measured moving*, four sticky stack cards on strictly rising
 offsets and opaque backgrounds, the scrolly (one active step, the active tag changing, the bonds
@@ -124,7 +127,7 @@ src/
 
 Sections, in order: hero (product photo on its own drifting plane) → product ticker → 01 positioning stats → 02 formula (what each nutrient is
 documented to contribute to) → 03 the name (“Calcium AEP = phosphoethanolamine, one ingredient not two”) → 04 Supplement Facts panel (paper break) →
-05 who it is for + timing-with-medication caution → 06 customer reviews → 07 manufacturing → 08 social channels → 09 one support inbox (mailto, no form) → footer.
+05 who it is for + timing-with-medication caution → 06 customer reviews → 07 manufacturing → 08 social channels → 09 one support inbox (mailto, no form; the address printed on the bottle is named in text, never linked) → footer.
 
 The FAQ (“Common questions”) and “The record” (known-vs-assumed ledger) sections were removed at the owner's request, together with the editorial
 asides that used to sit under them: the naming origin story, the testimonial disclosure paragraph, the per-ingredient `note` prose, the second

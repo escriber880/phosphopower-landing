@@ -405,6 +405,12 @@ export const contact = {
     { label: 'Location', value: brand.address },
     { label: 'Adverse events', value: `Report to ${brand.email}`, href: `mailto:${brand.email}` },
   ],
+  /* The printed label and this page disagree, and a customer with a bottle in hand
+     will notice. Stated here rather than left to be discovered — and deliberately not
+     a link, because an address nobody reads must not be offered as a contact channel.
+     If the artwork is ever reprinted, this string and the bottle are the two to fix. */
+  printed:
+    'Bottles in circulation print contact@phosphopower.com on the back label. That is not the service inbox — the address above is the one messages are answered from.',
   write: {
     title: 'Write to us',
     body:
