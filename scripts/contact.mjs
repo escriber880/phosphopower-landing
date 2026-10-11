@@ -1,10 +1,12 @@
-/* The documentation-pack request was retired: support is one inbox, so this gate
-   checks the *absence* of the machinery and the presence of a working mailto.
-   A removed form leaves three silent failures behind — a dead anchor in the nav, a
-   gate that still passes because its selectors vanished, and a boundary note nobody
-   renders any more. Each is asserted here. */
+/* Support is one inbox and one ledger. The request form went first; the "Write to us"
+   card and the agency statement went next. Each removal leaves a different silent
+   failure — a dead nav anchor, a gate that passes because its selectors vanished, a
+   footnote asterisk pointing at no note — so every one of them is asserted here as an
+   *absence* you can break by re-adding the thing. Run with `npm run contact`. */
 import { chromium } from 'playwright'
-import { brand } from '../src/data/site.js'
+import { brand, contact, legal, formula } from '../src/data/site.js'
+
+const claimTotal = formula.items.reduce((n, i) => n + (i.claims?.length || 0), 0)
 
 const BASE = process.env.SHOT_BASE || 'http://127.0.0.1:5173/'
 const results = []
@@ -24,78 +26,101 @@ await p.goto(BASE, { waitUntil: 'networkidle' })
 await p.evaluate(() => document.querySelector('#contact').scrollIntoView())
 await p.waitForTimeout(400)
 
-const page = await p.evaluate(() => ({
-  forms: document.querySelectorAll('#contact form, .form-card, #f-name, #f-email, #f-consent').length,
-  mailto: document.querySelector('.ask-card a[href^="mailto:"]')?.getAttribute('href') || null,
-  channelHref: document.querySelector('.channel-list a[href^="mailto:"]')?.getAttribute('href') || null,
-  channels: [...document.querySelectorAll('.channel-list li')].map((li) => li.innerText.replace(/\s+/g, ' ')),
-  askNote: document.querySelector('.ask-note')?.innerText || '',
-  packNote: document.querySelector('.pack-note')?.innerText.replace(/\s+/g, ' ').trim() || '',
-  packLinks: document.querySelectorAll('.pack-note a, a[href*="phosphopower.com"]').length,
-  mailtos: [...new Set([...document.querySelectorAll('a[href^="mailto:"]')].map((a) => a.getAttribute('href')))],
-  bodyText: document.body.innerText.replace(/\s+/g, ' ').toLowerCase(),
-  nav: [...document.querySelectorAll('.nav-links a, .nav-cta')].map((a) => a.innerText.replace(/\s+/g, ' ').trim()),
-  rail: [...document.querySelectorAll('.rail-tick')].map((t) => t.getAttribute('aria-label') || t.innerText.replace(/\s+/g, ' ').trim()),
-  contactAnchor: !!document.querySelector('#contact'),
-}))
+const page = await p.evaluate(() => {
+  const notes = [...document.querySelectorAll('.note-line')].map((el) => {
+    const box = el.getBoundingClientRect()
+    const rg = document.createRange()
+    rg.selectNodeContents(el)
+    const painted = [...rg.getClientRects()]
+    return {
+      text: el.innerText.replace(/\s+/g, ' ').trim(),
+      h: Math.round(box.height),
+      // both cells of a stretched grid get the row's height, so the shorter note ends
+      // up with dead space under its text — that is what "looks half-filled" means
+      trailing: painted.length ? Math.round(box.bottom - parseFloat(getComputedStyle(el).paddingBottom) - Math.max(...painted.map((r) => r.bottom))) : 999,
+      w: Math.round(box.width),
+      o: parseFloat(getComputedStyle(el).opacity || '1'),
+      links: el.querySelectorAll('a').length,
+    }
+  })
+  return {
+    forms: document.querySelectorAll('#contact form, .form-card, .ask-card, .ask-note, #f-name, #f-email, #f-consent').length,
+    channelHrefs: [...document.querySelectorAll('.channel-list a[href^="mailto:"]')].map((a) => a.getAttribute('href')),
+    channels: [...document.querySelectorAll('.channel-list li')].map((li) => li.innerText.replace(/\s+/g, ' ')),
+    mailtos: [...new Set([...document.querySelectorAll('a[href^="mailto:"]')].map((a) => a.getAttribute('href')))],
+    phosphoLinks: document.querySelectorAll('a[href*="phosphopower.com"]').length,
+    notes,
+    topCols: getComputedStyle(document.querySelector('.contact-top')).gridTemplateColumns.split(' ').length,
+    noteCols: getComputedStyle(document.querySelector('.contact-notes')).gridTemplateColumns.split(' ').length,
+    claimStars: [...document.querySelectorAll('.claim-list li')].filter((li) => /\.\s*\*\s*$/.test(li.innerText.trim())).map((li) => li.innerText.trim()),
+    claimLines: document.querySelectorAll('.claim-list li').length,
+    bodyText: document.body.innerText.replace(/\s+/g, ' ').toLowerCase(),
+    nav: [...document.querySelectorAll('.nav-links a, .nav-cta')].map((a) => a.innerText.replace(/\s+/g, ' ').trim()),
+    rail: [...document.querySelectorAll('.rail-tick')].map((t) => t.getAttribute('aria-label') || t.innerText.replace(/\s+/g, ' ').trim()),
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  }
+})
 
+/* ── what was retired stays retired ─────────────────────────────────────────── */
 pass('no form machinery left in the section', page.forms === 0, `${page.forms} stale nodes`)
-pass('ask card hands over a bare mailto', page.mailto === `mailto:${brand.email}`, String(page.mailto))
-pass('email channel uses the same inbox', page.channelHref === `mailto:${brand.email}`, String(page.channelHref))
-pass('support inbox is the service address', page.channels.some((c) => /email/i.test(c) && c.includes(brand.email)), page.channels.join(' · '))
+pass('the "Write to us" card is gone from the DOM', page.forms === 0 && page.notes.length === 2, `${page.notes.length} note lines`)
+pass('its copy does not survive in the footer or nav', !/write to us|open a blank email/.test(page.bodyText))
+pass('the data file carries neither the card nor the statement', contact.write === undefined && legal.disclaimer === undefined, `contact.write=${typeof contact.write} legal.disclaimer=${typeof legal.disclaimer}`)
+pass('the agency statement is off the page', !/food and drug|not been evaluated|\bfda\b/.test(page.bodyText))
+pass('no claim is left with an orphan asterisk', page.claimLines === claimTotal && page.claimStars.length === 0, `${page.claimStars.length}/${page.claimLines} of ${claimTotal} claim lines still end in .*`)
 pass('“monitored” is gone', !/monitored/i.test(page.bodyText), 'the page must not promise a watched line')
+/* The asterisks are data and the statement is markup; both can come back on their own.
+   What can also come back silently is a *sentence* telling readers where to look for a
+   note that no longer exists — copy an editor writes from memory of the old layout. */
+pass('no sentence gestures at a footnote that is not there', !/points to the one note|\* on a line|foot of this page|see the footer/i.test(page.bodyText), (page.bodyText.match(/.{0,40}(points to the one note|\* on a line|foot of this page).{0,20}/) || ['none'])[0])
 pass('the doc-pack request is gone', !/documentation pack|request the documentation/.test(page.bodyText))
-/* the bottle prints a different address; the page now says so. The failure mode is
-   the note turning into a second contact link — naming an address and offering it are
-   different acts, and only one of them is ours to stand behind. */
-pass('the printed-address note is on the page', /contact@phosphopower\.com/.test(page.packNote) && /service inbox/.test(page.packNote), JSON.stringify(page.packNote.slice(0, 60)))
-pass('it is named as text, never linked', page.packLinks === 0 && page.mailtos.every((h) => h === `mailto:${brand.email}`), `links=${page.packLinks} mailtos=${page.mailtos.join(',')}`)
-pass('boundary note renders with the inbox', /medical|diagnos/i.test(page.askNote), JSON.stringify(page.askNote.slice(0, 48)))
-// innerText comes back uppercased by .nav-links { text-transform: uppercase }, so
-// label assertions must be case-insensitive or they fail on a correct page
-pass('nav points at the section, with honest labels', /ask a question/i.test(page.nav.join('|')) && /email support/i.test(page.nav.join('|')) && !/documentation|request docs/i.test(page.nav.join('|')), page.nav.join(' | '))
+
+/* ── what must survive the removals ─────────────────────────────────────────── */
+// the Email row is now the only handoff: if the card's CTA went and this href went
+// stale, support would be unreachable and the audit trail would look intentional
+pass('the Email row hands over the service inbox', page.channelHrefs.length === 2 && page.channelHrefs.every((h) => h === `mailto:${brand.email}`), page.channelHrefs.join(' · '))
+pass('no second inbox is offered anywhere', page.phosphoLinks === 0 && page.mailtos.every((h) => h === `mailto:${brand.email}`), `links=${page.phosphoLinks} mailtos=${page.mailtos.join(',')}`)
+pass('support inbox is the service address', page.channels.some((c) => /email/i.test(c) && c.includes(brand.email)), page.channels.join(' · '))
+pass('the printed-address note still reads', /contact@phosphopower\.com/i.test(page.notes[0]?.text) && /service inbox/i.test(page.notes[0]?.text), JSON.stringify(String(page.notes[0]?.text).slice(0, 52)))
+pass('the boundary note still reads', /no purchase is made/i.test(page.notes[1]?.text) && /medical|diagnos/i.test(page.notes[1]?.text), JSON.stringify(String(page.notes[1]?.text).slice(0, 52)))
+// innerText is uppercased by .nav-links { text-transform: uppercase }, so label
+// assertions have to be case-insensitive or they fail on a correct page
+pass('nav still points at the section with honest labels', /ask a question/i.test(page.nav.join('|')) && /email support/i.test(page.nav.join('|')) && !/documentation|request docs|write to us/i.test(page.nav.join('|')), page.nav.join(' | '))
 pass('rail label for 09 matches the nav', page.rail.some((r) => /ask a question/i.test(r)) && !/request docs/i.test(page.rail.join(' ')), page.rail.at(-1))
-pass('#contact anchor still resolves', page.contactAnchor)
+
+/* ── composition: two removals left two real risks ──────────────────────────── */
+pass('ledger keeps two columns on desktop', page.topCols === 2 && page.noteCols === 2, `top=${page.topCols} notes=${page.noteCols}`)
+pass('neither note box is left visibly half-empty', page.notes.every((n) => n.trailing >= 0 && n.trailing < 26 && n.o > 0.9 && n.w > 200) && Math.abs(page.notes[0].trailing - page.notes[1].trailing) < 12, page.notes.map((n) => `${n.trailing}px dead / ${n.w}px wide`).join(' · '))
+pass('no horizontal overflow at 1440', page.overflow === 0, `${page.overflow}px`)
 pass('zero page errors', errors.length === 0, errors.slice(0, 2).join(' | '))
 
-/* the note has to survive the small screen, where a submit button used to be the
-   only thing carrying it */
+/* ── the small screen: the notes were the last thing carrying the fine print ─── */
 const mob = await b.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' })
 const mp = await mob.newPage()
 await mp.goto(BASE, { waitUntil: 'networkidle' })
-// scroll the note itself into view: it is anchored to the base of a stretched card,
-// so a fixed #contact-top scroll leaves it below the fold on a 390px screen. Asserting
-// "visible" against the fold measures my scroll position, not the page.
-await mp.evaluate(() => document.querySelector('.ask-note').scrollIntoView({ block: 'end' }))
+// scroll the target itself: these notes sit at the bottom of a long section, so
+// asserting "inside the fold" after a #contact-top scroll measures my scroll
+// position, not the page. Paint + containment is the check that means "visible".
+await mp.evaluate(() => document.querySelector('.contact-notes').scrollIntoView({ block: 'end' }))
 await mp.waitForTimeout(400)
 const m = await mp.evaluate(() => {
-  const n = document.querySelector('.ask-note')
-  const pn = document.querySelector('.pack-note')
-  const btn = document.querySelector('.ask-card .btn')
-  const card = document.querySelector('.ask-card')
-  if (!n || !card) return { missing: true }
-  const r = n.getBoundingClientRect(), cr = card.getBoundingClientRect(), cs = getComputedStyle(n)
-  const br = btn?.getBoundingClientRect()
-  const pr = pn?.getBoundingClientRect(), pcs = pn ? getComputedStyle(pn) : null
+  const rows = [...document.querySelectorAll('.note-line')].map((el) => {
+    const r = el.getBoundingClientRect()
+    return { h: Math.round(r.height), w: Math.round(r.width), top: Math.round(r.top), o: parseFloat(getComputedStyle(el).opacity || '1') }
+  })
+  const anchors = [...document.querySelectorAll('.channel-list a')].map((a) => Math.round(a.getBoundingClientRect().height))
   return {
-    pack: pn ? { h: Math.round(pr.height), w: Math.round(pr.width), o: parseFloat(pcs.opacity || '1'), fs: pcs.fontSize } : null,
-    height: Math.round(r.height),
-    width: Math.round(r.width),
-    opacity: parseFloat(cs.opacity || '1'),
-    // .ask-card is .glass, which is overflow:hidden — a note or CTA pushed past the
-    // card box would be silently cut off, so containment is the real check
-    clipped: r.bottom > cr.bottom + 1 || r.right > cr.right + 1 || r.left < cr.left - 1,
-    btnClipped: br ? br.bottom > cr.bottom + 1 || br.right > cr.right + 1 : true,
-    inViewport: r.top >= 0 && r.bottom <= innerHeight,
+    rows,
+    stacked: rows.length > 1 ? rows[1].top > rows[0].top + 20 : true,
+    cols: getComputedStyle(document.querySelector('.contact-notes')).gridTemplateColumns.split(' ').length,
+    tapMin: Math.min(...anchors),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    cta: Math.round(br?.width || 0),
   }
 })
-pass('mobile: note painted, not clipped by the glass card', !m.missing && m.height > 12 && m.width > 40 && m.opacity > 0.9 && !m.clipped && !m.btnClipped, JSON.stringify(m))
-pass('mobile: printed-address note is painted, not crushed', m.pack && m.pack.h > 12 && m.pack.w > 100 && m.pack.o > 0.9, JSON.stringify(m.pack))
-pass('mobile: CTA is tappable and nothing overflows', m.cta > 120 && m.overflow === 0, `cta=${m.cta}px overflow=${m.overflow}`)
-await mp.screenshot({ path: 'shots/11-contact-mobile.png' })
+pass('mobile: both notes painted and stacked', m.rows.length === 2 && m.stacked && m.cols === 1 && m.rows.every((r) => r.h > 12 && r.w > 100 && r.o > 0.9), JSON.stringify(m.rows))
+pass('mobile: channel rows stay tappable, nothing overflows', m.tapMin >= 44 && m.overflow === 0, `minRow=${m.tapMin}px overflow=${m.overflow}`)
 
+await mp.screenshot({ path: 'shots/11-contact-mobile.png' })
 await p.evaluate(() => document.querySelector('#contact').scrollIntoView())
 await p.waitForTimeout(300)
 await p.screenshot({ path: 'shots/11-contact.png' })

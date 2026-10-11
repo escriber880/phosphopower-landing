@@ -27,7 +27,9 @@ const r = await p.evaluate(() => ({
   imgLoaded: (() => { const i = document.querySelector('.product-img'); return i ? `${i.naturalWidth}×${i.naturalHeight}` : 'MISSING' })(),
   h1: document.querySelector('.display')?.innerText.replace(/\n/g, ' | '),
   panelRows: [...document.querySelectorAll('.facts-row')].map((x) => x.innerText.replace(/\n/g, ' ')),
-  disclaimerInFooter: !!document.querySelector('.footer-disclaimer')?.innerText.includes('not been evaluated'),
+  agencyCopy: /food and drug|not been evaluated|\bFDA\b/i.test(document.body.innerText) ? document.body.innerText.match(/.{0,34}(food and drug|not been evaluated|\bFDA\b).{0,20}/i)[0].replace(/\s+/g, ' ') : null,
+  orphanStars: [...document.querySelectorAll('.claim-list li')].filter((li) => /\.\s*\*\s*$/.test(li.innerText.trim())).length,
+  askCard: document.querySelectorAll('.ask-card, .ask-note, #contact form').length,
   overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   cssApplied: getComputedStyle(document.body).backgroundColor,
   revealVisible: getComputedStyle(document.querySelector('.ing-card')).opacity,
@@ -53,7 +55,7 @@ const head = await p.evaluate(() => ({
   noscript: document.querySelector('noscript')?.textContent.replace(/\s+/g, ' ').trim() || '',
 }))
 const drift = []
-for (const stale of ['chelated', 'bisglycinate', 'vegetarian', '1,000 mg', 'data-edit="', 'care@nutrihealthusa', 'nutrihealthusa.example', 'COMPLIANCE.md'])
+for (const stale of ['chelated', 'bisglycinate', 'vegetarian', '1,000 mg', 'data-edit="', 'care@nutrihealthusa', 'nutrihealthusa.example', 'COMPLIANCE.md', 'These statements have not been evaluated', 'footer-disclaimer', 'Write to us', 'Open a blank email'])
   if (raw.toLowerCase().includes(stale.toLowerCase())) drift.push(stale)
 if (!/vegan/i.test(head.desc + head.noscript)) drift.push('no "vegan" in description/noscript')
 if (!head.noscript.includes(brand.email)) drift.push(`noscript is missing ${brand.email}`)
@@ -87,15 +89,20 @@ if (drift.length) {
 console.log(`✓ head + noscript match the panel (${head.desc.length}-char description, ${brand.email} live, no stale claims, no data-edit attributes)`)
 
 // Hard shape guard: 9 numbered sections (01→09), no FAQ/Evidence, disclaimer inlined.
+/* The guard used to fail *because* the footer statement was missing. Inverting a
+   gate is the easy part — what makes it worth keeping is that each half is still
+   falsifiable: a re-added sentence trips agencyCopy, a claim that keeps its asterisk
+   trips orphanStars, and a resurrected card trips askCard. */
 const nums = r.numbered || []
 const okShape = nums.length === 9 && nums[0] === '01' && nums[8] === '09' &&
-  r.faqOrLedger === false && r.disclaimerInFooter === true && r.externalRequests === 0
+  r.faqOrLedger === false && r.externalRequests === 0 &&
+  r.agencyCopy === null && r.orphanStars === 0 && r.askCard === 0
 if (!okShape) {
-  console.error('✗ SECTION SHAPE FAILED', JSON.stringify({ numbered: nums, faqOrLedger: r.faqOrLedger }))
+  console.error('✗ SECTION SHAPE FAILED', JSON.stringify({ numbered: nums, faqOrLedger: r.faqOrLedger, agencyCopy: r.agencyCopy, orphanStars: r.orphanStars, askCard: r.askCard }))
   await b.close()
   process.exit(1)
 }
-console.log('✓ section shape: 9 numbered sections (01→09), no FAQ/Evidence, disclaimer inlined, 0 external requests')
+console.log('✓ section shape: 9 numbered sections (01→09), no FAQ/Evidence remnant, no agency statement and no orphan asterisk left from it, 0 external requests')
 
 await b.close()
 process.exit(errors.length ? 1 : 0)

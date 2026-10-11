@@ -11,10 +11,11 @@
    3. `brand.social[]` → confirm each handle is really yours before printing
       it. The name is used elsewhere, so verify before you publish a handle.
 
-   The only regulatory sentence on the page is `legal.disclaimer` in the
-   footer, linked from each claim by the asterisk. Everything else here is
-   product copy. (For the rules behind that asterisk, see docs/COMPLIANCE.md
-   — an internal file that is not part of the published page.)
+   No regulatory sentence is printed on this page any more: the agency statement
+   was retired at the owner's request and the claim asterisks were removed with it,
+   so no footnote points at text that does not exist here. Everything below is
+   product copy. (docs/COMPLIANCE.md — internal, not part of the published page —
+   still describes what re-adding the statement would require.)
    ══════════════════════════════════════════════════════════════════════════ */
 
 export const brand = {
@@ -131,8 +132,12 @@ export const positioning = {
 export const formula = {
   kicker: '02 — The formula',
   title: 'Three nutrients, and what each one is documented to contribute to.',
+  /* The old second sentence pointed at the asterisk that used to sit on every claim and
+     at the statement in the footer. Both are gone, so this had to go with them: a line
+     telling the reader where to look for a note that does not exist is worse than
+     saying nothing. The framing sentence carries the same limit in its own words. */
   intro:
-    'Each statement describes normal nutrition and body function. The * on a line points to the one note at the foot of this page.',
+    'Each statement describes normal nutrition and body function — what the mineral does in a body, not what this capsule promises you.',
   items: [
     {
       name: 'Calcium AEP',
@@ -141,9 +146,9 @@ export const formula = {
       elemental: '70 mg total calcium per 2 capsules (5% DV)',
       accent: 'gold',
       claims: [
-        'Calcium contributes to normal muscle contraction.*',
-        'Calcium is needed for the maintenance of bones and teeth.*',
-        'Calcium participates in cell signaling and normal blood clotting.*',
+        'Calcium contributes to normal muscle contraction.',
+        'Calcium is needed for the maintenance of bones and teeth.',
+        'Calcium participates in cell signaling and normal blood clotting.',
       ],
       claimSource: 'Calcium — a well-characterized essential mineral.',
     },
@@ -154,9 +159,9 @@ export const formula = {
       elemental: '0% DV — a trace amount, not a functional dose',
       accent: 'blue',
       claims: [
-        'Magnesium contributes to normal muscle function.*',
-        'Magnesium supports energy metabolism and electrolyte balance.*',
-        'Magnesium is involved in normal nervous system function.*',
+        'Magnesium contributes to normal muscle function.',
+        'Magnesium supports energy metabolism and electrolyte balance.',
+        'Magnesium is involved in normal nervous system function.',
       ],
       claimSource: 'Magnesium — a well-characterized essential mineral.',
     },
@@ -167,9 +172,9 @@ export const formula = {
       elemental: '364% DV as printed on the label',
       accent: 'blue',
       claims: [
-        'Zinc supports normal immune function.*',
-        'Zinc contributes to protein synthesis and cell division.*',
-        'Zinc is an antioxidant that helps protect cells from free radicals.*',
+        'Zinc supports normal immune function.',
+        'Zinc contributes to protein synthesis and cell division.',
+        'Zinc is an antioxidant that helps protect cells from free radicals.',
       ],
       claimSource: 'Zinc — a well-characterized essential mineral.',
     },
@@ -399,7 +404,8 @@ export const social = {
 export const contact = {
   kicker: '09 — Care',
   title: 'Product, lot, COA and label questions.',
-  sub: 'One inbox, answered by the people who specify the formula: composition, timing with food, sourcing and what a given lot was tested for. Anything clinical gets forwarded to the right professional, not answered here.',
+  sub:
+    'One inbox, answered by the people who specify the formula: composition, timing with food, sourcing and what a given lot was tested for. Put the lot number printed on the base of the bottle in the subject line and the answer is about your batch rather than the product in general. Anything clinical gets forwarded to the right professional, not answered here.',
   channels: [
     { label: 'Email', value: brand.email, href: `mailto:${brand.email}` },
     { label: 'Location', value: brand.address },
@@ -411,19 +417,19 @@ export const contact = {
      If the artwork is ever reprinted, this string and the bottle are the two to fix. */
   printed:
     'Bottles in circulation print contact@phosphopower.com on the back label. That is not the service inbox — the address above is the one messages are answered from.',
-  write: {
-    title: 'Write to us',
-    body:
-      'Put the lot number printed on the base of the bottle in the subject line and we can answer about your specific batch instead of the product in general.',
-    cta: 'Open a blank email',
-    note:
-      'No purchase is made on this page. Do not send symptoms, diagnoses or medication lists — that creates a medical-relationship expectation we cannot legally meet.',
-  },
+  /* The boundary that used to sit under a submit button. It belongs to the address,
+     not to a card: with no form there is nothing to promise about a reply, and this is
+     still the line that stops an inbox from reading as a consultation. */
+  boundary:
+    'No purchase is made on this page. Do not send symptoms, diagnoses or medication lists — that creates a medical-relationship expectation we cannot legally meet.',
 }
 
 export const legal = {
-  disclaimer:
-    'These statements have not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure, or prevent any disease.',
+  /* The agency statement was retired at the owner's request. That is why the nine
+     ingredient claims lost their trailing asterisk in the same edit: a footnote mark
+     with no note beneath it is worse than no mark at all, because it tells the reader
+     a qualification exists somewhere on this page. The sentence is still printed on the
+     physical label, next to the claims it qualifies, and `bullets[0]` points there. */
   bullets: [
     'Dietary supplement. Use as directed on the product label, which governs; this page is a summary of it.',
     'Not a substitute for a varied and balanced diet or a medically supervised plan. Keep out of reach of children.',

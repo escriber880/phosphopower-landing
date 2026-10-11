@@ -1,5 +1,4 @@
-import { contact, brand } from '../data/site.js'
-import { Arrow } from './Icons.jsx'
+import { contact } from '../data/site.js'
 import Reveal from './Reveal.jsx'
 
 export default function Contact() {
@@ -10,53 +9,53 @@ export default function Contact() {
           {contact.kicker}
         </Reveal>
 
-        <div className="contact-grid">
+        {/* No card any more, and no second column of glass to fill: a "Write to us"
+            panel whose only action was a mailto repeated the row below it, and a static
+            bundle has nothing else to put in that slot. The section is a ledger now —
+            what the line is, and the two things worth saying about it. */}
+        <div className="contact-top">
           <Reveal>
             <h2 className="h2">{contact.title}</h2>
+          </Reveal>
+          <Reveal delay={80}>
             <p className="lead">{contact.sub}</p>
+          </Reveal>
+        </div>
 
-            <ul className="channel-list" data-edit={import.meta.env.DEV ? 'Replace placeholder contact details with live ones' : undefined}>
-              {contact.channels.map((c) => (
-                <li key={c.label}>
-                  {/* not every channel is a link — a postal address must not
-                      render as an href-less anchor the whole tree crashes on */}
-                  {c.href ? (
-                    <a href={c.href} target={c.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
-                      <b>{c.label}</b>
-                      <em>{c.value}</em>
-                    </a>
-                  ) : (
-                    <span>
-                      <b>{c.label}</b>
-                      <em>{c.value}</em>
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+        <Reveal>
+          <ul className="channel-list" data-edit={import.meta.env.DEV ? 'Replace placeholder contact details with live ones' : undefined}>
+            {contact.channels.map((c) => (
+              <li key={c.label}>
+                {/* not every channel is a link — a postal address must not
+                    render as an href-less anchor the whole tree crashes on */}
+                {c.href ? (
+                  <a href={c.href} target={c.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+                    <b>{c.label}</b>
+                    <em>{c.value}</em>
+                  </a>
+                ) : (
+                  <span>
+                    <b>{c.label}</b>
+                    <em>{c.value}</em>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
 
+          <div className="contact-notes">
             {/* plain text, never an href: the printed address is named so the bottle and
-                the page reconcile, not offered as a second inbox. Inside the column's
-                Reveal on purpose — a nested one would animate twice and could sit
-                opacity:0 under its own observer. */}
-            <p className="pack-note">
+                the page reconcile, not offered as a second inbox */}
+            <p className="note-line">
               <b>On the bottle</b>
               {contact.printed}
             </p>
-          </Reveal>
-
-          <Reveal className="ask-card glass glass--asym" delay={90}>
-            <h3>{contact.write.title}</h3>
-            <p>{contact.write.body}</p>
-
-            {/* A plain mailto, not a form: a static bundle has nowhere to POST, and a
-                "Request logged" panel would describe a record that does not exist. */}
-            <a className="btn btn-primary" href={`mailto:${brand.email}`}>
-              {contact.write.cta} <Arrow />
-            </a>
-            <p className="ask-note">{contact.write.note}</p>
-          </Reveal>
-        </div>
+            <p className="note-line">
+              <b>Before you write</b>
+              {contact.boundary}
+            </p>
+          </div>
+        </Reveal>
       </div>
     </section>
   )

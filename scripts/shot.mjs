@@ -164,7 +164,11 @@ await page.evaluate(() => document.querySelector('#contact').scrollIntoView())
 await page.waitForTimeout(300)
 const contactOk = await page.evaluate(() => ({
   forms: document.querySelectorAll('#contact form, .form-card').length,
-  mailto: document.querySelector('.ask-card a[href^="mailto:"]')?.getAttribute('href') || null,
+  /* the ask-card is gone; the Email row is the only handoff left, so that is what
+     "contact works" means now */
+  mailto: document.querySelector('.channel-list a[href^="mailto:"]')?.getAttribute('href') || null,
+  card: document.querySelectorAll('.ask-card, .ask-note').length,
+  stars: [...document.querySelectorAll('.claim-list li')].filter((li) => /\.\s*\*\s*$/.test(li.innerText)).length,
 }))
 await page.screenshot({ path: `${OUT}/11-contact.png` })
 

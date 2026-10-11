@@ -11,8 +11,6 @@ export default function Footer() {
       <Kinetic as="p" className="footer-wordmark" text={`${brand.shortName} Micronized`} step={38} />
 
       <div className="wrap">
-        <p className="footer-disclaimer">{legal.disclaimer}</p>
-
         <div className="footer-grid">
           <div className="footer-brand">
             <a className="brandmark" href="#top">
@@ -36,7 +34,10 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4>Mandatory statements</h4>
+            {/* Not "Mandatory statements": the sentence that actually is mandatory — and was
+            the only one on this page — is gone, so the heading would have been
+            asserting an obligation the list below no longer contains. */}
+            <h4>The fine print</h4>
             <ul className="legal-list">
               {legal.bullets.map((b) => (
                 <li key={b.slice(0, 28)}>{b}</li>

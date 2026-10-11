@@ -71,7 +71,7 @@ node scripts/verify-standalone.mjs
 Produces a **single HTML file (~550 KB)** with the CSS, JS and the product photo inlined as a data URI — no external requests, so it opens from
 `file://`, from an email attachment, or inside a sandboxed preview, and still renders identically on a server. `scripts/verify-standalone.mjs`
 loads it over `file://` in headless Chromium and asserts exactly that: 0 external resource requests, image decoded at 1600×1600, 9 numbered
-sections with no FAQ/Evidence remnant, the four Supplement Facts rows with their computed %DV, the footer disclaimer inlined, 0 console errors. `npm run shots` also captures
+sections with no FAQ/Evidence remnant, the four Supplement Facts rows with their computed %DV, **no agency statement and no orphan claim asterisk** anywhere in the file, 0 console errors. `npm run shots` also captures
 `shots/12-standalone-file.png` of it.
 
 Deploy `dist/` anywhere static (Netlify, S3+CloudFront, Vercel, your own nginx). Nothing server-side is required.
@@ -135,8 +135,11 @@ positioning paragraph and two of the four caption-policy bullets.
 
 ## Voice: what was taken out on purpose
 
-The published page carries **no commentary about regulators, agencies or claim law** — one exception, the single required footnote sentence in
-`legal.disclaimer` (footer), which every claim line links to with `*`. Removed in the copy pass: the hero disclaimer block, the DSHEA/§403(r)(6)
+The published page carries **no commentary about regulators, agencies or claim law, and no agency statement at all**: `legal.disclaimer` was
+retired at the owner's request, and in the same edit the nine `*` marks on the ingredient claim lines were removed, because a footnote marker
+with no note beneath it tells the reader a qualification exists somewhere it does not. `formula.intro` — which used to say where the asterisk
+pointed — was rewritten for the same reason, and `scripts/contact.mjs` + `npm run verify` fail if either the marks or that sentence come back.
+The physical label still prints the statement next to the claims it qualifies, and `legal.bullets[0]` sends the reader there. Removed earlier in the copy pass: the hero disclaimer block, the DSHEA/§403(r)(6)
 pills on each ingredient card, the “claims audit” block (banned vs. allowed phrasing), the “read this before you write a caption” callout, the
 the “is this FDA approved?” FAQ item and the whole FAQ section, the caption-policy list, and the FTC/MedWatch references in the review disclosure and contact block.
 
