@@ -26,6 +26,7 @@ npm run dev      # http://localhost:5173  (host: true, so it also works behind a
 npm run build    # static output in dist/
 npm run lint     # oxlint
 npm run shots    # headless-Chromium visual + runtime audit (see below)
+npm run spin     # the hero turntable: frames compared by hash, texture pinned by sha256
 npm run design   # design-layer checks + r*.png captures (see below)
 npm run parallax # measures the scroll-parallax rates in a real browser
 npm run voice    # scans the rendered copy for regulatory/agency language
@@ -45,6 +46,26 @@ npm run dev &     # the shot scripts expect the dev server on :5173
 npm run shots && npm run design && npm run parallax && npm run cross
 npm run deploy:sync && npm run verify   # rebuild the single file, then gate the artifact
 ```
+
+## The 3D bottle
+
+The hero's product card renders the **printed label artwork wrapped on a cylinder** in a 2D
+canvas: one source column sampled per screen column through `θ = asin(dx/R) + φ`, which derives
+the crowding of the print near the silhouette instead of painting a gradient over it. No WebGL,
+no dependency, no extra request. Drag, arrow keys (Shift for a bigger step, Home for the front),
+or the `3D / Photo` toggle; `touch-action: pan-y` keeps vertical scrolling native on a phone.
+
+The texture is a **derived file**: `python3 scripts/prepare-wrap.py` reads the supplied artwork
+and writes `src/assets/label-wrap.jpg`, cutting the fine-print block out of the left panel,
+reflowing that panel, and removing the two claim asterisks the block used to explain (see
+`docs/COMPLIANCE.md` §9). `npm run spin` then pins the result by sha256, so a swapped artwork
+cannot ship a render nobody re-reviewed. Re-run the script after replacing the artwork, then
+update the recorded hash deliberately.
+
+Geometry is derived from the artwork's own aspect (circumference / label height = 2.19), which
+puts the printed wrap at ~88% of the turn: the bare slice behind the seam is drawn as plastic,
+because that is what a glued wrap looks like. The cap, shoulder and base are modelled proportions,
+which is why the card says so.
 
 `npm run design` covers the design layer (**30 checks**): aurora mesh + inert grain, exactly 9 drifting
 numerals numbered 01→09 with no gaps, the word masks actually opening and carrying a text stroke, two

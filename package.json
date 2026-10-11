@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "shots": "node scripts/shot.mjs",
+    "spin": "node scripts/spin.mjs",
     "contact": "node scripts/contact.mjs",
     "design": "node scripts/design-check.mjs",
     "parallax": "node scripts/parallax-check.mjs",
