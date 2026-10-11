@@ -4,7 +4,7 @@
    footnote asterisk pointing at no note — so every one of them is asserted here as an
    *absence* you can break by re-adding the thing. Run with `npm run contact`. */
 import { chromium } from 'playwright'
-import { brand, contact, legal, formula } from '../src/data/site.js'
+import { brand, contact, formula } from '../src/data/site.js'
 
 const claimTotal = formula.items.reduce((n, i) => n + (i.claims?.length || 0), 0)
 
@@ -55,6 +55,7 @@ const page = await p.evaluate(() => {
     claimStars: [...document.querySelectorAll('.claim-list li')].filter((li) => /\.\s*\*\s*$/.test(li.innerText.trim())).map((li) => li.innerText.trim()),
     claimLines: document.querySelectorAll('.claim-list li').length,
     bodyText: document.body.innerText.replace(/\s+/g, ' ').toLowerCase(),
+    legalList: document.querySelectorAll('.legal-list').length,
     nav: [...document.querySelectorAll('.nav-links a, .nav-cta')].map((a) => a.innerText.replace(/\s+/g, ' ').trim()),
     rail: [...document.querySelectorAll('.rail-tick')].map((t) => t.getAttribute('aria-label') || t.innerText.replace(/\s+/g, ' ').trim()),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -65,7 +66,13 @@ const page = await p.evaluate(() => {
 pass('no form machinery left in the section', page.forms === 0, `${page.forms} stale nodes`)
 pass('the "Write to us" card is gone from the DOM', page.forms === 0 && page.notes.length === 2, `${page.notes.length} note lines`)
 pass('its copy does not survive in the footer or nav', !/write to us|open a blank email/.test(page.bodyText))
-pass('the data file carries neither the card nor the statement', contact.write === undefined && legal.disclaimer === undefined, `contact.write=${typeof contact.write} legal.disclaimer=${typeof legal.disclaimer}`)
+/* The fine print followed the card and the agency sentence out of the file: the whole `legal` export
+   is gone, so a restored list must be re-authored rather than un-hidden. Data file and rendered text
+   are checked apart, so neither half can be satisfied by a rename. */
+const legalExport = 'legal' in (await import('../src/data/site.js'))
+pass('the data file carries neither the card nor a legal block', contact.write === undefined && !legalExport, `contact.write=${typeof contact.write} legal export=${legalExport}`)
+const legalProse = /this page is a summary of it|not a substitute for a varied|Stop and speak with a physician|talk to your clinician before use|not a promise of how the product will work/i.test(page.bodyText)
+pass('the five footer bullets do not survive as prose', page.legalList === 0 && !legalProse, `${page.legalList} .legal-list nodes, prose=${legalProse}`)
 pass('the agency statement is off the page', !/food and drug|not been evaluated|\bfda\b/.test(page.bodyText))
 pass('no claim is left with an orphan asterisk', page.claimLines === claimTotal && page.claimStars.length === 0, `${page.claimStars.length}/${page.claimLines} of ${claimTotal} claim lines still end in .*`)
 pass('“monitored” is gone', !/monitored/i.test(page.bodyText), 'the page must not promise a watched line')

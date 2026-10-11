@@ -100,7 +100,7 @@ Deploy `dist/` anywhere static (Netlify, S3+CloudFront, Vercel, your own nginx).
 
 | What | Where |
 | --- | --- |
-| All copy, claims, socials, legal text | `src/data/site.js` |
+| All copy, claims, socials | `src/data/site.js` |
 | Supplement Facts amounts (drives %DV automatically) | `facts.rows` in `src/data/site.js` |
 | Product photo | `public/product.png` |
 | Colors, type scale, spacing | `:root` in `src/index.css` |
@@ -165,11 +165,15 @@ positioning paragraph and two of the four caption-policy bullets.
 
 ## Voice: what was taken out on purpose
 
-The published page carries **no commentary about regulators, agencies or claim law, and no agency statement at all**: `legal.disclaimer` was
-retired at the owner's request, and in the same edit the nine `*` marks on the ingredient claim lines were removed, because a footnote marker
+The published page carries **no commentary about regulators, agencies or claim law, no agency statement and no legal boilerplate**: the
+`legal` export is gone entirely — its disclaimer sentence first, then its five footer bullets — retired at the owner's request, and in the same edit the nine `*` marks on the ingredient claim lines were removed, because a footnote marker
 with no note beneath it tells the reader a qualification exists somewhere it does not. `formula.intro` — which used to say where the asterisk
 pointed — was rewritten for the same reason, and `scripts/contact.mjs` + `npm run verify` fail if either the marks or that sentence come back.
-The physical label still prints the statement next to the claims it qualifies, and `legal.bullets[0]` sends the reader there. Removed earlier in the copy pass: the hero disclaimer block, the DSHEA/§403(r)(6)
+The physical label still prints the statement next to the claims it qualifies; nothing on the page points the reader there, and the footer
+column that used to say so is gone with its list — `npm run contact` fails if either the export or one of the five sentences returns as prose.
+The precautions themselves did not all leave: section 04 quotes the label's own caution (pregnancy, medication, medical condition), its
+"Do not exceed the labelled serving" and "Keep out of reach of children", and the panel footnote still says the bottle governs if a printed
+panel differs. What is gone is the summary-of-it framing and the review-expectation sentence. Removed earlier in the copy pass: the hero disclaimer block, the DSHEA/§403(r)(6)
 pills on each ingredient card, the “claims audit” block (banned vs. allowed phrasing), the “read this before you write a caption” callout, the
 the “is this FDA approved?” FAQ item and the whole FAQ section, the caption-policy list, and the FTC/MedWatch references in the review disclosure and contact block.
 

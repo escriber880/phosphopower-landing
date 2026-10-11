@@ -400,18 +400,3 @@ export const contact = {
   boundary:
     'No purchase is made on this page. Do not send symptoms, diagnoses or medication lists — that creates a medical-relationship expectation we cannot legally meet.',
 }
-
-export const legal = {
-  /* The agency statement was retired at the owner's request. That is why the nine
-     ingredient claims lost their trailing asterisk in the same edit: a footnote mark
-     with no note beneath it is worse than no mark at all, because it tells the reader
-     a qualification exists somewhere on this page. The sentence is still printed on the
-     physical label, next to the claims it qualifies, and `bullets[0]` points there. */
-  bullets: [
-    'Dietary supplement. Use as directed on the product label, which governs; this page is a summary of it.',
-    'Not a substitute for a varied and balanced diet or a medically supervised plan. Keep out of reach of children.',
-    'Do not exceed the serving size on the label. Stop and speak with a physician if you suspect a reaction.',
-    'If you are pregnant, breastfeeding, being treated for a condition or taking prescription medication, talk to your clinician before use.',
-    'Individual experiences in reviews are not a promise of how the product will work for you.',
-  ],
-}

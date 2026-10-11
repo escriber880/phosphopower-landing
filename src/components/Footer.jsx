@@ -1,4 +1,4 @@
-import { brand, legal } from '../data/site.js'
+import { brand } from '../data/site.js'
 import { SocialIcon, Mark } from './Icons.jsx'
 import Kinetic from './Kinetic.jsx'
 
@@ -31,18 +31,6 @@ export default function Footer() {
                 </a>
               ))}
             </div>
-          </div>
-
-          <div>
-            {/* Not "Mandatory statements": the sentence that actually is mandatory — and was
-            the only one on this page — is gone, so the heading would have been
-            asserting an obligation the list below no longer contains. */}
-            <h4>The fine print</h4>
-            <ul className="legal-list">
-              {legal.bullets.map((b) => (
-                <li key={b.slice(0, 28)}>{b}</li>
-              ))}
-            </ul>
           </div>
 
           <div>
