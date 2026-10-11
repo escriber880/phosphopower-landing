@@ -1,0 +1,51 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Two valid ways to publish this site. Keep exactly one of the two blocks enabled.
+services:
+  # ── A) build from source (use this while you keep editing the React app) ──────
+  - type: web
+    name: phosphopower-landing
+    runtime: static
+    rootDir: .
+    branch: main
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      # Vite 8 needs Node ^20.19 || >=22.12. Render's default image can lag, so pin it
+      # here as well as in .nvmrc (the two must agree).
+      - key: NODE_VERSION
+        value: "22"
+      # devDependencies include Playwright, which downloads ~400 MB of browsers on a
+      # plain `npm ci`. The visual gates never run on Render, so skip the browsers or
+      # the build spends minutes fetching binaries and may time out.
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+    headers:
+      # hashed filenames can be cached forever; the HTML must not be, or a redeploy
+      # looks like it did nothing.
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /index.html
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      # This is a single page with in-page anchors, so no SPA fallback is needed
+      # today; it is here so a future /route does not 404 before anyone remembers why.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ── B) publish the prebuilt single file (no Node, no npm, seconds to deploy) ───
+  # Run `npm run deploy:sync` and commit deploy/index.html, then swap the block above
+  # for this one. Nothing builds on Render, so nothing can fail to build.
+  # - type: web
+  #   name: phosphopower-landing
+  #   runtime: static
+  #   branch: main
+  #   buildCommand: ""
+  #   staticPublishPath: ./deploy
+  #   headers:
+  #     - path: /*
+  #       name: Cache-Control
+  #       value: public, max-age=0, must-revalidate

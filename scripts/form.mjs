@@ -1,0 +1,26 @@
+import { chromium } from 'playwright'
+const b = await chromium.launch()
+const p = await (await b.newContext({ viewport:{width:1440,height:900}, reducedMotion:'reduce' })).newPage()
+await p.goto('http://127.0.0.1:5173/', { waitUntil:'networkidle' })
+await p.evaluate(()=>document.querySelector('#contact').scrollIntoView())
+// 1. required-consent gate must block submit
+await p.fill('#f-name','Jordan Avery'); await p.fill('#f-email','jordan@domain.com')
+await p.click('.form-card button[type="submit"]')
+await p.waitForTimeout(250)
+const blocked = await p.evaluate(()=>!document.querySelector('.form-ok'))
+// 2. with consent ticked it must succeed
+await p.check('#f-consent')
+await p.click('.form-card button[type="submit"]')
+await p.waitForTimeout(300)
+const ok = await p.evaluate(()=>document.querySelector('.form-ok')?.innerText.slice(0,60) || 'FAIL')
+// 3. invalid email must be caught by type=email validation
+await p.reload({waitUntil:'networkidle'})
+await p.evaluate(()=>document.querySelector('#contact').scrollIntoView())
+await p.fill('#f-name','X'); await p.fill('#f-email','not-an-email'); await p.check('#f-consent')
+await p.click('.form-card button[type="submit"]')
+await p.waitForTimeout(200)
+const emailGuards = await p.evaluate(()=>!document.querySelector('.form-ok'))
+console.log(JSON.stringify({ consentBlocksSubmit: blocked, submittedWithConsent: ok, badEmailBlocked: emailGuards }, null, 2))
+await p.evaluate(()=>document.querySelector('.form-ok')?.scrollIntoView())
+await p.screenshot({ path:'shots/11-form-sent.png' })
+await b.close()

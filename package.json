@@ -1,0 +1,35 @@
+{
+  "name": "phosphopower-landing",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "shots": "node scripts/shot.mjs",
+    "shots:form": "node scripts/form.mjs",
+    "standalone": "vite build && node scripts/inline.mjs",
+    "voice": "node scripts/voice-scan.mjs",
+    "design": "node scripts/design-check.mjs",
+    "parallax": "node scripts/parallax-check.mjs",
+    "cross": "node scripts/cross-check.mjs",
+    "deploy:sync": "npm run standalone && node -e \"const fs=require('fs');fs.mkdirSync('deploy',{recursive:true});fs.copyFileSync('standalone/PhosphoPower-landing.html','deploy/index.html');console.log('\u2713 deploy/index.html refreshed')\""
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "playwright": "^1.64.0",
+    "vite": "^8.3.0"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}
