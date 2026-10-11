@@ -103,6 +103,16 @@ template data gets an orange dashed outline with a label. It is dev-only (`impor
 grep -rn "data-edit" src/
 ```
 
+### The Supplement Facts sheet is a sheet
+
+Section 04 is deliberately **not** on the dark ground: `.section--paper` warms it to `#f7f4ec`, and
+`.facts-panel` paints the FDA-style white sheet — 2px ink border, 6px radius, 8px/4px rules, the
+two-column `.facts-grid` with the notes beside it. Those rules live at the end of `src/index.css` and
+were briefly lost when the disclaimer text was deleted (they sat in the same run of CSS), so the panel
+came back as bare text on the dark ground. No gate checks whether a panel is white — check
+`screenshots/04-facts.png` (`npm run shots`) after any CSS deletion near there. The disclaimer copy
+stays out; only the styling came back.
+
 ## Structure
 
 ```
